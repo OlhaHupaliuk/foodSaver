@@ -19,7 +19,6 @@ app.get("/", (req, res) => {
   res.json({
     message: "FoodSaver API is running",
     status: "success",
-    timestamp: new Date().toISOString(),
   });
 });
 
@@ -45,13 +44,10 @@ app.use((req, res) => {
 });
 
 // Запуск сервера
-const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`FoodSaver Server Running   
-Port: ${PORT}
-http://localhost:${PORT}
-  `);
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
 
 // Обробка помилок при завершенні процесу
@@ -61,6 +57,6 @@ process.on("unhandledRejection", (err) => {
 });
 
 process.on("SIGTERM", () => {
-  console.log("👋 SIGTERM received, shutting down gracefully");
+  console.log(" SIGTERM received, shutting down gracefully");
   process.exit(0);
 });
