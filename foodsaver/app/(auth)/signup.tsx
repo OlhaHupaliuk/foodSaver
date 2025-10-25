@@ -1,27 +1,68 @@
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { ArrowLeft, Mail, Lock, User as UserIcon, Store } from 'lucide-react-native';
+import { ArrowLeft, Mail, Lock, User as UserIcon, Store,WifiOff ,AlertCircle} from 'lucide-react-native';
+import { useAuth } from '../../hooks/useAuth';
+import { AuthErrorType } from '../../types/auth';
 
 export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [userType, setUserType] = useState<'consumer' | 'restaurant'>('consumer');
-  const [error, setError] = useState('');
+  const [userType, setUserType] = useState<'user' | 'restaurant'>('user');
+  const [localError, setLocalError] = useState('');
+  const { signUp, loading: authLoading, error: authError, clearError } = useAuth();
 
-  const handleSignUp = () => {
+    
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleSignUp = async () => {    
+    setLocalError('');
+
+    if (!email || !password) {
+      setLocalError('Будь ласка, заповніть усі поля');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setLocalError('Введіть коректну email адресу');
+      return;
+    }
+
     if (!email || !password || !fullName) {
-      setError('Будь ласка, заповніть усі поля');
+      setLocalError('Будь ласка, заповніть усі поля');
       return;
     }
 
     if (password.length < 6) {
-      setError('Пароль повинен містити мінімум 6 символів');
+      setLocalError('Пароль повинен містити мінімум 6 символів');
       return;
     }
-
+    try {
+      clearError();
+      await signUp({name: fullName, email, password, role:'user'});
+      
+      console.log('Redirecting to main app');
+      router.replace('/(tabs)');
+    } catch (err: any) {
+      console.log('Sign in error caught:', err);
+    }
   };
+
+    const getErrorMessage = () => {
+    if (localError) return localError;
+    if (!authError) return '';
+
+    if (authError.type) {
+        return authError.message;
+    }
+  };
+    const errorMessage = getErrorMessage();
+    const isNetworkError = authError?.type === AuthErrorType.NETWORK_ERROR;
+  
 
   return (
     <ScrollView style={styles.container}>
@@ -33,16 +74,36 @@ export default function SignUpScreen() {
         <Text style={styles.title}>Реєстрація</Text>
         <Text style={styles.subtitle}>Створіть новий акаунт</Text>
 
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        {errorMessage ? (
+          <View style={[
+            styles.errorContainer,
+            isNetworkError && styles.errorContainerWarning
+          ]}>
+            <View style={styles.errorIconWrapper}>
+              {isNetworkError ? (
+                <WifiOff size={20} color="#ef4444" />
+              ) : (
+                <AlertCircle size={20} color="#ef4444" />
+              )}
+            </View>
+            <Text style={styles.errorText}>{errorMessage}</Text>
+            <TouchableOpacity
+              onPress={clearError}
+              style={styles.errorClose}
+            >
+              <Text style={styles.errorCloseText}>✕</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
 
         <View style={styles.form}>
           <View style={styles.typeSelector}>
             <TouchableOpacity
-              style={[styles.typeButton, userType === 'consumer' && styles.typeButtonActive]}
-              onPress={() => setUserType('consumer')}
+              style={[styles.typeButton, userType === 'user' && styles.typeButtonActive]}
+              onPress={() => setUserType('user')}
             >
-              <UserIcon size={24} color={userType === 'consumer' ? '#ffffff' : '#6b7280'} />
-              <Text style={[styles.typeButtonText, userType === 'consumer' && styles.typeButtonTextActive]}>
+              <UserIcon size={24} color={userType === 'user' ? '#ffffff' : '#6b7280'} />
+              <Text style={[styles.typeButtonText, userType === 'user' && styles.typeButtonTextActive]}>
                 Споживач
               </Text>
             </TouchableOpacity>
@@ -105,6 +166,15 @@ export default function SignUpScreen() {
               Вже є акаунт? <Text style={styles.linkTextBold}>Увійти</Text>
             </Text>
           </TouchableOpacity>
+                    {__DEV__ && (
+                      <View style={styles.debugInfo}>
+                        <Text style={styles.debugText}>Debug Info:</Text>
+                        <Text style={styles.debugText}>Loading: {authLoading.toString()}</Text>
+                        {authError && (
+                          <Text style={styles.debugText}>Error Type: {authError.type}</Text>
+                        )}
+                      </View>
+                    )}
         </View>
       </View>
     </ScrollView>
@@ -220,5 +290,49 @@ const styles = StyleSheet.create({
   linkTextBold: {
     fontWeight: '600',
     color: '#10b981',
+  },
+    errorContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#fee2e2',
+    padding: 12,
+    paddingLeft: 14,
+    borderRadius: 8,
+    marginBottom: 16,
+    alignItems: 'center',
+    borderLeftWidth: 4,
+    borderLeftColor: '#ef4444',
+  },
+  errorContainerWarning: {
+    backgroundColor: '#fef3c7',
+    borderLeftColor: '#f59e0b',
+  },
+  errorIconWrapper: {
+    marginRight: 10,
+  },
+  errorClose: {
+    padding: 4,
+    marginLeft: 8,
+  },
+  errorCloseText: {
+    color: '#ef4444',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  eyeIcon: {
+    padding: 8,
+    marginRight: -8,
+  },
+  debugInfo: {
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: '#f0fdf4',
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#22c55e',
+  },
+  debugText: {
+    fontSize: 12,
+    color: '#166534',
+    fontFamily: 'monospace',
   },
 });

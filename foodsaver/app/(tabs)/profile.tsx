@@ -1,16 +1,21 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { LogOut, User, Mail, Phone } from 'lucide-react-native';
 import { router } from 'expo-router';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function ProfileScreen() {
-    const full_name = 'Olha'
-    const email = 'olyahupaliuk@gmail.com'
-    const phone = '+38012345678'
-    const user_type = 'restaurant'
+  const {signOut} = useAuth()
 
   const handleSignOut = async () => {
+    try {
+     await signOut();
+    console.log('signed out')
     router.replace('/(auth)/welcome');
+    }catch(err) {
+      console.log(err)
+    }
   };
+  const { user } = useAuth();
 
   return (
     <View style={styles.container}>
@@ -31,7 +36,7 @@ export default function ProfileScreen() {
               <User size={20} color="#6b7280" />
               <View style={styles.infoContent}>
                 <Text style={styles.infoLabel}>Ім'я</Text>
-                <Text style={styles.infoValue}>{full_name}</Text>
+                <Text style={styles.infoValue}>{user?.name || ''}</Text>
               </View>
             </View>
 
@@ -39,7 +44,7 @@ export default function ProfileScreen() {
               <Mail size={20} color="#6b7280" />
               <View style={styles.infoContent}>
                 <Text style={styles.infoLabel}>Email</Text>
-                <Text style={styles.infoValue}>{email}</Text>
+                <Text style={styles.infoValue}>{user?.email || ''}</Text>
               </View>
             </View>
 
@@ -47,21 +52,22 @@ export default function ProfileScreen() {
                 <Phone size={20} color="#6b7280" />
                 <View style={styles.infoContent}>
                   <Text style={styles.infoLabel}>Телефон</Text>
-                  <Text style={styles.infoValue}>{phone}</Text>
+                  <Text style={styles.infoValue}>{user?.phone || 'не вказано'}</Text>
                 </View>
               </View>
 
             <View style={styles.infoRow}>
               <View style={styles.typeBadge}>
                 <Text style={styles.typeBadgeText}>
-                  {user_type === 'restaurant' ? 'Ресторан' : 'Споживач'}
+                  {user?.role || 'restaurant' === 'restaurant' ? 'Ресторан' : 'Споживач'}
                 </Text>
               </View>
             </View>
           </View>
         </View>
 
-        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+        <TouchableOpacity style={styles.signOutButton} 
+        onPress={handleSignOut}>
           <LogOut size={20} color="#ef4444" />
           <Text style={styles.signOutText}>Вийти</Text>
         </TouchableOpacity>
@@ -119,7 +125,7 @@ const styles = StyleSheet.create({
   },
   infoRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: 12,
   },
   infoContent: {
@@ -132,7 +138,7 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 16,
-    color: '#111827',
+    color: '#4d4f53ff',
     fontWeight: '500',
   },
   typeBadge: {

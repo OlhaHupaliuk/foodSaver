@@ -42,7 +42,7 @@ export default function SignInScreen() {
     }
 
     if (!validateEmail(email)) {
-      setLocalError('Введіть коректний email адрес');
+      setLocalError('Введіть коректна email адреса');
       return;
     }
 
@@ -167,7 +167,6 @@ export default function SignInScreen() {
             </Text>
           </TouchableOpacity>
 
-          {/* Debug Info (видалити в продакшені) */}
           {__DEV__ && (
             <View style={styles.debugInfo}>
               <Text style={styles.debugText}>Debug Info:</Text>
@@ -210,7 +209,6 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     marginBottom: 32,
   },
-  // 🆕 Покращена обробка помилок
   errorContainer: {
     flexDirection: 'row',
     backgroundColor: '#fee2e2',
