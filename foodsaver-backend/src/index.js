@@ -23,10 +23,10 @@ app.get("/", (req, res) => {
   });
 });
 
-// app.use('/api/auth', require('./routes/auth'));
-// app.use('/api/restaurants', require('./routes/restaurants'));
-// app.use('/api/food-items', require('./routes/foodItems'));
-// app.use('/api/orders', require('./routes/orders'));
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/restaurants", require("./routes/restaurants"));
+app.use("/api/food-items", require("./routes/foodItems"));
+app.use("/api/orders", require("./routes/orders"));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
