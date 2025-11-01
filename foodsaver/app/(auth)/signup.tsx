@@ -1,7 +1,7 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { ArrowLeft, Mail, Lock, User as UserIcon, Store,WifiOff ,AlertCircle} from 'lucide-react-native';
+import { ArrowLeft, Mail, Lock, User as UserIcon, Store, Phone, MapPin, Link as LinkIcon, WifiOff, AlertCircle } from 'lucide-react-native';
 import { useAuth } from '../../hooks/useAuth';
 import { AuthErrorType } from '../../types/auth';
 
@@ -9,21 +9,30 @@ export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
   const [userType, setUserType] = useState<'user' | 'restaurant'>('user');
+  const [restaurantName, setRestaurantName] = useState('');
+  const [restaurantAddress, setRestaurantAddress] = useState('');
+  const [googleMapsLink, setGoogleMapsLink] = useState('');
+  
   const [localError, setLocalError] = useState('');
   const { signUp, loading: authLoading, error: authError, clearError } = useAuth();
 
-    
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const handleSignUp = async () => {    
+  const validatePhone = (phone: string) => {
+    const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const handleSignUp = async () => {
     setLocalError('');
 
     if (!email || !password) {
-      setLocalError('Будь ласка, заповніть усі поля');
+      setLocalError('Будь ласка, заповніть усі обов\'язкові поля');
       return;
     }
 
@@ -32,39 +41,63 @@ export default function SignUpScreen() {
       return;
     }
 
-    if (!email || !password || !fullName) {
-      setLocalError('Будь ласка, заповніть усі поля');
-      return;
-    }
-
     if (password.length < 6) {
       setLocalError('Пароль повинен містити мінімум 6 символів');
       return;
     }
+
+    if (userType === 'restaurant') {
+      if (!restaurantName || !phone || !restaurantAddress) {
+        setLocalError('Для ресторану обов\'язкові: назва, телефон та адреса');
+        return;
+      }
+
+      if (!validatePhone(phone)) {
+        setLocalError('Введіть коректний номер телефону');
+        return;
+      }
+    } else {
+      if (!fullName) {
+        setLocalError('Будь ласка, введіть ваше ім\'я');
+        return;
+      }
+    }
+
     try {
       clearError();
-      await signUp({name: fullName, email, password, role:'user'});
       
-      console.log('Redirecting to main app');
+      await signUp({
+        name: userType === 'restaurant' ? restaurantName : fullName,
+        email,
+        password,
+        role: userType,
+        phone: phone || undefined,
+        restaurantName: userType === 'restaurant' ? restaurantName : undefined,
+        restaurantAddress: userType === 'restaurant' ? restaurantAddress : undefined,
+        googleMapsLink: userType === 'restaurant' ? googleMapsLink : undefined,
+      });
+
       router.replace('/(tabs)');
     } catch (err: any) {
-      console.log('Sign in error caught:', err);
+      console.log('Sign up error:', err);
     }
   };
 
-    const getErrorMessage = () => {
+  const getErrorMessage = () => {
     if (localError) return localError;
     if (!authError) return '';
-
-    if (authError.type) {
-        return authError.message;
-    }
+    if (authError.type) return authError.message;
   };
-    const errorMessage = getErrorMessage();
-    const isNetworkError = authError?.type === AuthErrorType.NETWORK_ERROR;
-  
+
+  const errorMessage = getErrorMessage();
+  const isNetworkError = authError?.type === AuthErrorType.NETWORK_ERROR;
 
   return (
+        <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
     <ScrollView style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
         <ArrowLeft size={24} color="#111827" />
@@ -75,28 +108,19 @@ export default function SignUpScreen() {
         <Text style={styles.subtitle}>Створіть новий акаунт</Text>
 
         {errorMessage ? (
-          <View style={[
-            styles.errorContainer,
-            isNetworkError && styles.errorContainerWarning
-          ]}>
+          <View style={[styles.errorContainer, isNetworkError && styles.errorContainerWarning]}>
             <View style={styles.errorIconWrapper}>
-              {isNetworkError ? (
-                <WifiOff size={20} color="#ef4444" />
-              ) : (
-                <AlertCircle size={20} color="#ef4444" />
-              )}
+              {isNetworkError ? <WifiOff size={20} color="#ef4444" /> : <AlertCircle size={20} color="#ef4444" />}
             </View>
             <Text style={styles.errorText}>{errorMessage}</Text>
-            <TouchableOpacity
-              onPress={clearError}
-              style={styles.errorClose}
-            >
+            <TouchableOpacity onPress={clearError} style={styles.errorClose}>
               <Text style={styles.errorCloseText}>✕</Text>
             </TouchableOpacity>
           </View>
         ) : null}
 
         <View style={styles.form}>
+          {/* Селектор типу користувача */}
           <View style={styles.typeSelector}>
             <TouchableOpacity
               style={[styles.typeButton, userType === 'user' && styles.typeButtonActive]}
@@ -119,22 +143,99 @@ export default function SignUpScreen() {
             </TouchableOpacity>
           </View>
 
-          <View style={styles.inputContainer}>
-            <UserIcon size={20} color="#9ca3af" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Повне ім'я"
-              value={fullName}
-              onChangeText={setFullName}
-            />
-          </View>
+          {userType === 'restaurant' ? (
+            <>
+              <View style={styles.inputContainer}>
+                <Store size={20} color="#9ca3af" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Назва ресторану *"
+                  value={restaurantName}
+                  placeholderTextColor="#9ca3af" 
+                  onChangeText={setRestaurantName}
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <UserIcon size={20} color="#9ca3af" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ім'я контактної особи"
+                  placeholderTextColor="#9ca3af" 
+                  value={fullName}
+                  onChangeText={setFullName}
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Phone size={20} color="#9ca3af" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Телефон *"
+                  value={phone}
+                  placeholderTextColor="#9ca3af" 
+                  onChangeText={setPhone}
+                  keyboardType="phone-pad"
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <MapPin size={20} color="#9ca3af" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Адреса *"
+                  value={restaurantAddress}
+                  placeholderTextColor="#9ca3af" 
+                  onChangeText={setRestaurantAddress}
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <LinkIcon size={20} color="#9ca3af" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Посилання Google Maps *"
+                  value={googleMapsLink}
+                  placeholderTextColor="#9ca3af" 
+                  onChangeText={setGoogleMapsLink}
+                  autoCapitalize="none"
+                />
+              </View>
+            </>
+          ) : (
+            <>
+              <View style={styles.inputContainer}>
+                <UserIcon size={20} color="#9ca3af" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Повне ім'я *"
+                  value={fullName}
+                  placeholderTextColor="#9ca3af" 
+                  onChangeText={setFullName}
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Phone size={20} color="#9ca3af" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Телефон (необов'язково)"
+                  value={phone}
+                  placeholderTextColor="#9ca3af" 
+                  onChangeText={setPhone}
+                  keyboardType="phone-pad"
+                />
+              </View>
+            </>
+          )}
 
           <View style={styles.inputContainer}>
             <Mail size={20} color="#9ca3af" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="Email"
+              placeholder="Email *"
               value={email}
+              placeholderTextColor="#9ca3af" 
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
@@ -145,19 +246,21 @@ export default function SignUpScreen() {
             <Lock size={20} color="#9ca3af" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="Пароль (мінімум 6 символів)"
+              placeholder="Пароль (мінімум 6 символів) *"
               value={password}
+              placeholderTextColor="#9ca3af" 
               onChangeText={setPassword}
               secureTextEntry
             />
           </View>
 
           <TouchableOpacity
-            style={[styles.button]}
+            style={[styles.button, authLoading && styles.buttonDisabled]}
             onPress={handleSignUp}
+            disabled={authLoading}
           >
             <Text style={styles.buttonText}>
-              Зареєструватися
+              {authLoading ? 'Реєстрація...' : 'Зареєструватися'}
             </Text>
           </TouchableOpacity>
 
@@ -166,18 +269,10 @@ export default function SignUpScreen() {
               Вже є акаунт? <Text style={styles.linkTextBold}>Увійти</Text>
             </Text>
           </TouchableOpacity>
-                    {__DEV__ && (
-                      <View style={styles.debugInfo}>
-                        <Text style={styles.debugText}>Debug Info:</Text>
-                        <Text style={styles.debugText}>Loading: {authLoading.toString()}</Text>
-                        {authError && (
-                          <Text style={styles.debugText}>Error Type: {authError.type}</Text>
-                        )}
-                      </View>
-                    )}
         </View>
       </View>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -266,6 +361,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     fontSize: 16,
     color: '#111827',
+    
   },
   button: {
     backgroundColor: '#10b981',

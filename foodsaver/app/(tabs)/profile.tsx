@@ -48,18 +48,18 @@ export default function ProfileScreen() {
               </View>
             </View>
 
-              <View style={styles.infoRow}>
+              {/* <View style={styles.infoRow}>
                 <Phone size={20} color="#6b7280" />
                 <View style={styles.infoContent}>
                   <Text style={styles.infoLabel}>Телефон</Text>
                   <Text style={styles.infoValue}>{user?.phone || 'не вказано'}</Text>
                 </View>
-              </View>
+              </View> */}
 
             <View style={styles.infoRow}>
               <View style={styles.typeBadge}>
                 <Text style={styles.typeBadgeText}>
-                  {user?.role || 'restaurant' === 'restaurant' ? 'Ресторан' : 'Споживач'}
+                  {user?.role == 'restaurant' ? 'Ресторан' : 'Споживач'}
                 </Text>
               </View>
             </View>

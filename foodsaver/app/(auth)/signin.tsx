@@ -107,7 +107,7 @@ export default function SignInScreen() {
               value={email}
               onChangeText={(text) => {
                 setEmail(text);
-                setLocalError(''); // Очищуємо помилку при введенні
+                setLocalError('');
               }}
               autoCapitalize="none"
               keyboardType="email-address"
@@ -116,7 +116,6 @@ export default function SignInScreen() {
             />
           </View>
 
-          {/* Password Input */}
           <View style={styles.inputContainer}>
             <Lock size={20} color="#9ca3af" style={styles.inputIcon} />
             <TextInput

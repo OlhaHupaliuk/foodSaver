@@ -4,6 +4,9 @@ export interface AuthUser {
   email: string;
   role: 'user' | 'restaurant' | 'admin';
   phone?: string;
+   restaurantName?: string;
+  restaurantAddress?: string;
+  googleMapsLink?: string;
 }
 
 export interface AuthResponse<T = any> {
@@ -24,6 +27,9 @@ export interface SignUpData {
   password: string;
   role: 'user' | 'restaurant';
   phone?: string;
+   restaurantName?: string;
+  restaurantAddress?: string;
+  googleMapsLink?: string;
 }
 
 export interface GetMeResponse {
