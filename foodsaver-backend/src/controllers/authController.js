@@ -2,7 +2,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { validationResult } = require("express-validator");
-const bcrypt = require("bcryptjs");
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -10,7 +9,7 @@ const generateToken = (id) => {
   });
 };
 
-// @desc    Register user (простий користувач)
+// @desc    Register user
 // @route   POST /api/auth/register
 // @access  Public
 exports.register = async (req, res, next) => {
@@ -27,25 +26,21 @@ exports.register = async (req, res, next) => {
     const { name, email, password, phone } = req.body;
 
     // Перевірка чи існує користувач
-    const userExists = await User.findOne({ email });
-    if (userExists) {
+    let user = await User.findOne({ email });
+    if (user) {
       return res.status(409).json({
         status: "error",
         message: "Користувач з таким email уже існує",
       });
     }
 
-    // Хешування пароля
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Створення користувача
-    const user = await User.create({
+    // Створення користувача БЕЗ координат
+    user = await User.create({
       name,
       email,
-      password: hashedPassword,
+      password,
       phone: phone || null,
-      role: "user", // За замовчуванням звичайний користувач
+      role: "user",
     });
 
     // Генерація токену
@@ -86,12 +81,29 @@ exports.login = async (req, res, next) => {
 
     const { email, password } = req.body;
 
+    // Валідація email та пароля
+    if (!email || !password) {
+      return res.status(400).json({
+        status: "error",
+        message: "Будь ласка введіть email та пароль",
+      });
+    }
+
     // Пошук користувача з паролем
     const user = await User.findOne({ email })
       .select("+password")
       .populate("restaurant");
 
-    if (!user || !(await user.matchPassword(password))) {
+    if (!user) {
+      return res.status(401).json({
+        status: "error",
+        message: "Невірний email або пароль",
+      });
+    }
+
+    // Перевірка паролю
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
       return res.status(401).json({
         status: "error",
         message: "Невірний email або пароль",
@@ -99,9 +111,6 @@ exports.login = async (req, res, next) => {
     }
 
     const token = generateToken(user._id);
-
-    // Видаляємо пароль перед відправкою
-    user.password = undefined;
 
     res.json({
       status: "success",

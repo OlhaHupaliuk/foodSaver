@@ -1,4 +1,6 @@
+// models/Restaurant.js
 const mongoose = require("mongoose");
+
 const restaurantSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -21,6 +23,8 @@ const restaurantSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  description: String,
+  // Координати для геопошуку
   location: {
     type: {
       type: String,
@@ -32,7 +36,6 @@ const restaurantSchema = new mongoose.Schema({
       required: true,
     },
   },
-  description: String,
   isActive: {
     type: Boolean,
     default: true,
@@ -43,5 +46,7 @@ const restaurantSchema = new mongoose.Schema({
   },
 });
 
+// Геоіндекс для пошуку за координатами
 restaurantSchema.index({ location: "2dsphere" });
+
 module.exports = mongoose.model("Restaurant", restaurantSchema);

@@ -1,3 +1,4 @@
+// hooks/useAuth.ts
 import { useEffect, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../services/api';
@@ -59,6 +60,7 @@ export const useAuth = () => {
 
       console.log('Signing up with:', data.email);
 
+      // Передаємо тільки базові поля для реєстрації
       const response = await api.auth.register({
         name: data.name,
         email: data.email,
@@ -145,7 +147,6 @@ export const useAuth = () => {
 
       let authError: AuthError;
 
-      // Обробка різних типів помилок
       if (errorMessage.includes('credentials') || errorMessage.includes('Invalid')) {
         authError = {
           type: AuthErrorType.INVALID_CREDENTIALS,

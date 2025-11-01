@@ -33,24 +33,11 @@ const userSchema = new mongoose.Schema({
     ref: "Restaurant",
     default: null,
   },
-  location: {
-    type: {
-      type: String,
-      enum: ["Point"],
-      default: "Point",
-    },
-    coordinates: {
-      type: [Number],
-    },
-  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
-
-// Геоіндекс для пошуку за координатами
-userSchema.index({ location: "2dsphere" });
 
 // Хеш паролю перед збереженням
 userSchema.pre("save", async function (next) {

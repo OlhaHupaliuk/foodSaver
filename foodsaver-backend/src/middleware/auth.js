@@ -1,11 +1,11 @@
+// middleware/auth.js
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-// перевірка JWT токену
+// Захист приватних route
 exports.protect = async (req, res, next) => {
   let token;
 
-  // перевірка наявності токену в headers
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -22,11 +22,10 @@ exports.protect = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
     req.user = await User.findById(decoded.id);
 
     if (!req.user) {
-      return res.status(401).json({
+      return res.status(404).json({
         status: "error",
         message: "User not found",
       });
@@ -36,20 +35,28 @@ exports.protect = async (req, res, next) => {
   } catch (error) {
     return res.status(401).json({
       status: "error",
-      message: "Not authorized, token failed",
+      message: "Not authorized to access this route",
     });
   }
 };
 
-// перевірка ролі користувача
+// Перевірка ролі користувача
 exports.authorize = (...roles) => {
   return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        status: "error",
+        message: "Not authenticated",
+      });
+    }
+
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         status: "error",
         message: `User role '${req.user.role}' is not authorized to access this route`,
       });
     }
+
     next();
   };
 };

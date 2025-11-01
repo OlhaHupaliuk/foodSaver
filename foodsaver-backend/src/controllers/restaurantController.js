@@ -17,7 +17,7 @@ exports.getRestaurants = async (req, res, next) => {
     let restaurants;
 
     if (longitude && latitude) {
-      const distance = maxDistance || 5000;
+      const distance = maxDistance || 5000; // метри
       restaurants = await Restaurant.find({
         location: {
           $near: {
@@ -110,9 +110,9 @@ exports.createRestaurant = async (req, res, next) => {
       coordinates = await geocodeAddress(req.body.address);
     }
 
-    // Якщо все ще немає координат, використовуємо координати користувача або за замовчуванням
+    // Якщо все ще немає координат, використовуємо за замовчуванням (Київ)
     if (!coordinates) {
-      coordinates = req.body.coordinates || [30.5234, 50.4501]; // За замовчуванням Київ
+      coordinates = [30.5234, 50.4501];
     }
 
     const restaurantData = {
