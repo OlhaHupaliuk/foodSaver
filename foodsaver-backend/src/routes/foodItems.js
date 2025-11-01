@@ -3,50 +3,32 @@ const express = require("express");
 const { body } = require("express-validator");
 const foodItemController = require("../controllers/foodItemController");
 const { protect, authorize } = require("../middleware/auth");
+const { foodItemValidation } = require("../utils/validators");
 
 const router = express.Router();
 
-// GET all food items (публічний)
-router.get("/", foodItemController.getFoodItems);
-
-// GET food items by restaurant (публічний)
+// GET food items by restaurant
 router.get(
   "/restaurant/:restaurantId",
   foodItemController.getFoodItemsByRestaurant
 );
 
-// GET single food item (публічний) - ПОВИНЕН БУТИ ПІСЛЯ більш специфічних маршрутів
+// GET all food items
+router.get("/", foodItemController.getFoodItems);
+
+// GET single food item
 router.get("/:id", foodItemController.getFoodItem);
 
-// POST create food item (тільки restaurant_owner та admin)
+// POST create food item
 router.post(
   "/",
   protect,
   authorize("restaurant_owner", "admin"),
-  [
-    body("title").trim().notEmpty().withMessage("Title is required"),
-    body("description")
-      .trim()
-      .notEmpty()
-      .withMessage("Description is required"),
-    body("originalPrice")
-      .isFloat({ min: 0 })
-      .withMessage("Original price must be a positive number"),
-    body("discountedPrice")
-      .isFloat({ min: 0 })
-      .withMessage("Discounted price must be a positive number"),
-    body("quantity")
-      .isInt({ min: 1 })
-      .withMessage("Quantity must be at least 1"),
-    body("expiryTime")
-      .isISO8601()
-      .withMessage("Expiry time must be a valid ISO8601 date"),
-    body("category").optional().trim(),
-  ],
+  foodItemValidation, // ✅ Використовуємо правильну валідацію
   foodItemController.createFoodItem
 );
 
-// PUT update food item (тільки restaurant_owner та admin)
+// PUT update food item
 router.put(
   "/:id",
   protect,
@@ -63,7 +45,7 @@ router.put(
   foodItemController.updateFoodItem
 );
 
-// DELETE food item (тільки restaurant_owner та admin)
+// DELETE food item
 router.delete(
   "/:id",
   protect,

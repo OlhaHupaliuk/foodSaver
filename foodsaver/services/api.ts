@@ -166,29 +166,29 @@ export const api = {
     },
 
     getById: (id: string) =>
-      api.request(`/food-items/${id}`, {
+      api.request<{ item: FoodItem }>(`/food-items/${id}`, {
         method: 'GET',
       }),
 
     getByRestaurant: (restaurantId: string) =>
-      api.request<FoodItem[]>(`/food-items/by-restaurant/${restaurantId}`, {
+      api.request<{ items: FoodItem[] }>(`/food-items/restaurant/${restaurantId}`, {
         method: 'GET',
       }),
 
     create: (data: any) =>
-      api.request('/food-items', {
+      api.request<{ item: FoodItem }>('/food-items', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
 
     update: (id: string, data: any) =>
-      api.request(`/food-items/${id}`, {
+      api.request<{ item: FoodItem }>(`/food-items/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       }),
 
     delete: (id: string) =>
-      api.request(`/food-items/${id}`, {
+      api.request<{ message: string }>(`/food-items/${id}`, {
         method: 'DELETE',
       }),
   },

@@ -15,10 +15,7 @@ exports.registerValidation = [
   body("password")
     .isLength({ min: 6 })
     .withMessage("Password must be at least 6 characters"),
-  body("role")
-    .optional()
-    .isIn(["user", "restaurant", "admin"])
-    .withMessage("Invalid role"),
+  body("phone").optional().trim(),
 ];
 
 // Валідація логіну
@@ -30,25 +27,32 @@ exports.loginValidation = [
 // Валідація ресторану
 exports.restaurantValidation = [
   body("name").trim().notEmpty().withMessage("Restaurant name is required"),
-  body("phone").notEmpty().withMessage("Phone number is required"),
-  body("location.coordinates")
-    .isArray({ min: 2, max: 2 })
-    .withMessage("Coordinates must be [longitude, latitude]"),
+  body("phone")
+    .trim()
+    .notEmpty()
+    .withMessage("Phone number is required")
+    .matches(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/)
+    .withMessage("Invalid phone format"),
+  body("address").trim().notEmpty().withMessage("Address is required"),
+  body("googleMapsLink")
+    .trim()
+    .notEmpty()
+    .withMessage("Google Maps link is required"),
 ];
 
-// Валідація food item
+// Валідація food item - ПРАВИЛЬНІ імена!
 exports.foodItemValidation = [
-  body("name").trim().notEmpty().withMessage("Food item name is required"),
+  body("title").trim().notEmpty().withMessage("Title is required"),
+  body("description").trim().notEmpty().withMessage("Description is required"),
   body("originalPrice")
     .isFloat({ min: 0 })
     .withMessage("Original price must be a positive number"),
   body("discountedPrice")
     .isFloat({ min: 0 })
     .withMessage("Discounted price must be a positive number"),
-  body("quantity")
-    .isInt({ min: 0 })
-    .withMessage("Quantity must be a positive integer"),
+  body("quantity").isInt({ min: 1 }).withMessage("Quantity must be at least 1"),
   body("expiryTime").isISO8601().withMessage("Valid expiry time is required"),
+  body("category").optional().trim(),
 ];
 
 // Валідація замовлення

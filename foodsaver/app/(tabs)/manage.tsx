@@ -7,7 +7,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { api } from '../../services/api';
 
 export default function ManageScreen() {
-  const { user } = useAuth();
+   const { user } = useAuth();
   const [restaurant, setRestaurant] = useState<any | null>(null);
   const [foodItems, setFoodItems] = useState<any[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -30,26 +30,24 @@ export default function ManageScreen() {
     }
   }, [user]);
 
-  const loadRestaurantData = async () => {
-    try {
-      setRestaurant({
-        id: user?.id,
-        name: user?.name,
-        address: user?.restaurant.address,
-        phone: user?.phone,
-      });
-    } catch (error) {
-      console.error('Error loading restaurant:', error);
-    }
-  };
-
-  const loadFoodItems = async () => {
+  const loadFoodItems = async () => { 
     try {
       setLoading(true);
-      const response = await api.foodItems.getByRestaurant(user?.id || '');
+      
+      // Отримуємо ID ресторану
+      const restaurantId = user?.restaurant?.id;
+      
+      if (!restaurantId) {
+        console.error('No restaurant ID found');
+        setFoodItems([]);
+        return;
+      }
+
+      const response = await api.foodItems.getByRestaurant(restaurantId);
       
       if (response.status === 'success' && response.data) {
-        setFoodItems(response.data || []);
+        const items = response.data.items || [];
+        setFoodItems(Array.isArray(items) ? items : []);
       }
     } catch (error) {
       console.error('Error loading food items:', error);
@@ -59,6 +57,64 @@ export default function ManageScreen() {
     }
   };
 
+  const loadRestaurantData = async () => {
+    try {
+      if (user?.restaurant) {
+        setRestaurant({
+          id: user.restaurant.id,
+          name: user.restaurant.name || user.name,
+          address: user.restaurant.address,
+          phone: user.restaurant.phone || user.phone,
+        });
+      }
+    } catch (error) {
+      console.error('Error loading restaurant:', error);
+    }
+  };
+
+  const toggleAvailability = async (itemId: string, currentStatus: boolean) => {
+    try {
+      const response = await api.foodItems.update(itemId, {
+        isAvailable: !currentStatus, 
+      });
+
+      if (response.status === 'success') {
+        setFoodItems(foodItems.map(item => 
+          (item.id === itemId)  
+            ? { ...item, isAvailable: !currentStatus }
+            : item
+        ));
+      }
+    } catch (error) {
+      console.error('Error updating item:', error);
+      Alert.alert('Помилка', 'Не вдалося оновити статус');
+    }
+  };
+
+  const handleDeleteItem = async (itemId: string) => {
+    Alert.alert(
+      'Видалити пропозицію?',
+      'Ця дія не може бути скасована',
+      [
+        { text: 'Скасувати', onPress: () => {} },
+        {
+          text: 'Видалити ',   
+          onPress: async () => {       
+            try {
+              await api.foodItems.delete(itemId);
+              setFoodItems(foodItems.filter(item => 
+                 item.id !== itemId  
+              ));
+              Alert.alert('Успіх', 'Пропозицію видалено');
+            } catch (error) {
+              Alert.alert('Помилка', 'Не вдалося видалити пропозицію');
+            }
+          },
+          style: 'destructive',
+        },
+      ]
+    );
+  };
   const validateForm = () => {
     if (!newItem.title.trim()) {
       Alert.alert('Помилка', 'Введіть назву страви');
@@ -101,25 +157,20 @@ export default function ManageScreen() {
       expiryTime.setHours(expiryTime.getHours() + parseInt(newItem.expiry_hours));
 
       const itemData = {
-        name: newItem.title,
+        title: newItem.title,
         description: newItem.description,
         category: newItem.category || 'Інше',
         originalPrice: parseFloat(newItem.original_price),
         discountedPrice: parseFloat(newItem.discount_price),
         quantity: parseInt(newItem.quantity),
         expiryTime: expiryTime.toISOString(),
-        isAvailable: true,
-        restaurant: user?.id, 
       };
-
 
       const response = await api.foodItems.create(itemData);
 
       if (response.status === 'success') {
-        // Додати нову позицію до списку
-        setFoodItems([...foodItems, response.data]);
+        setFoodItems([...foodItems, response.data.item]);
         
-        // Очистити форму
         setNewItem({
           title: '',
           description: '',
@@ -139,48 +190,6 @@ export default function ManageScreen() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const toggleAvailability = async (itemId: string, currentStatus: boolean) => {
-    try {
-      const response = await api.foodItems.update(itemId, {
-        is_available: !currentStatus,
-      });
-
-      if (response.status === 'success') {
-        setFoodItems(foodItems.map(item => 
-          item.id === itemId 
-            ? { ...item, is_available: !currentStatus }
-            : item
-        ));
-      }
-    } catch (error) {
-      console.error('Error updating item:', error);
-      Alert.alert('Помилка', 'Не вдалося оновити статус');
-    }
-  };
-
-  const handleDeleteItem = async (itemId: string) => {
-    Alert.alert(
-      'Видалити пропозицію?',
-      'Ця дія не може бути скасована',
-      [
-        { text: 'Скасувати', onPress: () => {} },
-        {
-          text: 'Видалити',
-          onPress: async () => {
-            try {
-              await api.foodItems.delete(itemId);
-              setFoodItems(foodItems.filter(item => item.id !== itemId));
-              Alert.alert('Успіх', 'Пропозицію видалено');
-            } catch (error) {
-              Alert.alert('Помилка', 'Не вдалося видалити пропозицію');
-            }
-          },
-          style: 'destructive',
-        },
-      ]
-    );
   };
 
   const calculateDiscount = () => {
@@ -238,7 +247,7 @@ export default function ManageScreen() {
               {foodItems.length} {foodItems.length === 1 ? 'позиція' : 'позицій'}
             </Text>
             <Text style={styles.statsSubvalue}>
-              {foodItems.filter(item => item.is_available).length} активних
+              {foodItems.filter(item => item.isAvailable).length} активних
             </Text>
           </View>
 
@@ -262,12 +271,12 @@ export default function ManageScreen() {
                   <TouchableOpacity
                     style={[
                       styles.statusBadge,
-                      !item.is_available && styles.statusBadgeInactive
+                      !item.isAvailable && styles.statusBadgeInactive
                     ]}
-                    onPress={() => toggleAvailability(item.id, item.is_available)}
+                    onPress={() => toggleAvailability(item.id, item.isAvailable)}
                   >
                     <Text style={styles.statusText}>
-                      {item.is_available ? 'Активна' : 'Неактивна'}
+                      {item.isAvailable ? 'Активна' : 'Неактивна'}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -283,14 +292,14 @@ export default function ManageScreen() {
                 <View style={styles.itemDetails}>
                   <View style={styles.priceRow}>
                     <Text style={styles.itemPrice}>
-                      {formatPrice(item.discount_price)}
+                      {formatPrice(item.discountedPrice)}
                     </Text>
                     <Text style={styles.itemPriceOriginal}>
-                      {formatPrice(item.original_price)}
+                      {formatPrice(item.originalPrice)}
                     </Text>
                     <View style={styles.discountBadge}>
                       <Text style={styles.discountText}>
-                        -{Math.round((1 - item.discount_price / item.original_price) * 100)}%
+                        -{Math.round((1 - item.discountedPrice / item.originalPrice) * 100)}%
                       </Text>
                     </View>
                   </View>
@@ -300,7 +309,7 @@ export default function ManageScreen() {
                       Кількість: {item.quantity}
                     </Text>
                     <Text style={styles.itemExpiry}>
-                      <Clock size={12} color="#ef4444" /> {getTimeUntilExpiry(item.expiry_time)}
+                      <Clock size={12} color="#ef4444" /> {getTimeUntilExpiry(item.expiryTime)}
                     </Text>
                   </View>
                 </View>

@@ -1,3 +1,4 @@
+// types/auth.ts
 export interface Restaurant {
   id: string;
   name: string;
@@ -7,7 +8,8 @@ export interface Restaurant {
   description?: string;
   owner: string;
   isActive: boolean;
-  createdAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AuthUser {
@@ -16,15 +18,16 @@ export interface AuthUser {
   email: string;
   phone?: string;
   role: 'user' | 'restaurant_owner' | 'admin';
-  restaurant?: Restaurant | null; // Посилання на ресторан якщо користувач власник
+  restaurant?: Restaurant | null;
   createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AuthResponse<T = any> {
   status: 'success' | 'error';
   data?: T;
   message?: string;
-  errors?: Array<{ msg: string }>;
+  errors?: Array<{ msg: string; path?: string; type?: string }>;
 }
 
 export interface AuthLoginResponse {
@@ -45,7 +48,7 @@ export interface CreateRestaurantData {
   address: string;
   googleMapsLink: string;
   description?: string;
-  coordinates?: [number, number]; // [longitude, latitude]
+  coordinates?: [number, number];
 }
 
 export interface GetMeResponse {
@@ -80,7 +83,7 @@ export interface FoodItem {
   restaurant: Restaurant | string;
   isAvailable: boolean;
   expiryTime: string;
-  createdAt: string;
+  createdAt?: string;
   updatedAt?: string;
 }
 
@@ -91,5 +94,6 @@ export interface Order {
   quantity: number;
   totalPrice: number;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
-  createdAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
