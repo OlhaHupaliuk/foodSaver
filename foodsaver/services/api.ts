@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AuthResponse, AuthLoginResponse, GetMeResponse, AuthUser, AuthError, AuthErrorType } from '../types/auth';
+import { AuthResponse, AuthLoginResponse, GetMeResponse, AuthUser, AuthError, AuthErrorType, FoodItem } from '../types/auth';
 
 const API_URL = 'http://192.168.0.103:5000/api';
 
@@ -171,7 +171,7 @@ export const api = {
       }),
 
     getByRestaurant: (restaurantId: string) =>
-      api.request(`/food-items/by-restaurant/${restaurantId}`, {
+      api.request<FoodItem[]>(`/food-items/by-restaurant/${restaurantId}`, {
         method: 'GET',
       }),
 

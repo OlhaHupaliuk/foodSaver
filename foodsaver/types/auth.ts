@@ -1,12 +1,23 @@
+export interface Restaurant {
+  id: string;
+  name: string;
+  phone: string;
+  address: string;
+  googleMapsLink: string;
+  description?: string;
+  owner: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
-  role: 'user' | 'restaurant' | 'admin';
   phone?: string;
-   restaurantName?: string;
-  restaurantAddress?: string;
-  googleMapsLink?: string;
+  role: 'user' | 'restaurant_owner' | 'admin';
+  restaurant?: Restaurant | null; // Посилання на ресторан якщо користувач власник
+  createdAt?: string;
 }
 
 export interface AuthResponse<T = any> {
@@ -25,11 +36,16 @@ export interface SignUpData {
   name: string;
   email: string;
   password: string;
-  role: 'user' | 'restaurant';
   phone?: string;
-   restaurantName?: string;
-  restaurantAddress?: string;
-  googleMapsLink?: string;
+}
+
+export interface CreateRestaurantData {
+  name: string;
+  phone: string;
+  address: string;
+  googleMapsLink: string;
+  description?: string;
+  coordinates?: [number, number]; // [longitude, latitude]
 }
 
 export interface GetMeResponse {
@@ -51,4 +67,29 @@ export interface AuthError {
   message: string;
   details?: any;
   statusCode?: number;
+}
+
+export interface FoodItem {
+  id: string;
+  title: string;
+  description: string;
+  category?: string;
+  originalPrice: number;
+  discountedPrice: number;
+  quantity: number;
+  restaurant: Restaurant | string;
+  isAvailable: boolean;
+  expiryTime: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface Order {
+  id: string;
+  user: string;
+  foodItem: FoodItem;
+  quantity: number;
+  totalPrice: number;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  createdAt: string;
 }

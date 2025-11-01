@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { ArrowLeft, Mail, Lock, User as UserIcon, Store, Phone, MapPin, Link as LinkIcon, WifiOff, AlertCircle } from 'lucide-react-native';
+import { ArrowLeft, Mail, Lock, User as UserIcon, Phone, WifiOff, AlertCircle } from 'lucide-react-native';
 import { useAuth } from '../../hooks/useAuth';
 import { AuthErrorType } from '../../types/auth';
 
@@ -10,11 +10,6 @@ export default function SignUpScreen() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
-  const [userType, setUserType] = useState<'user' | 'restaurant'>('user');
-  const [restaurantName, setRestaurantName] = useState('');
-  const [restaurantAddress, setRestaurantAddress] = useState('');
-  const [googleMapsLink, setGoogleMapsLink] = useState('');
-  
   const [localError, setLocalError] = useState('');
   const { signUp, loading: authLoading, error: authError, clearError } = useAuth();
 
@@ -24,6 +19,7 @@ export default function SignUpScreen() {
   };
 
   const validatePhone = (phone: string) => {
+    if (!phone) return true; // Телефон необов'язковий
     const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
     return phoneRegex.test(phone);
   };
@@ -31,7 +27,7 @@ export default function SignUpScreen() {
   const handleSignUp = async () => {
     setLocalError('');
 
-    if (!email || !password) {
+    if (!email || !password || !fullName) {
       setLocalError('Будь ласка, заповніть усі обов\'язкові поля');
       return;
     }
@@ -46,35 +42,19 @@ export default function SignUpScreen() {
       return;
     }
 
-    if (userType === 'restaurant') {
-      if (!restaurantName || !phone || !restaurantAddress) {
-        setLocalError('Для ресторану обов\'язкові: назва, телефон та адреса');
-        return;
-      }
-
-      if (!validatePhone(phone)) {
-        setLocalError('Введіть коректний номер телефону');
-        return;
-      }
-    } else {
-      if (!fullName) {
-        setLocalError('Будь ласка, введіть ваше ім\'я');
-        return;
-      }
+    if (phone && !validatePhone(phone)) {
+      setLocalError('Введіть коректний номер телефону');
+      return;
     }
 
     try {
       clearError();
       
       await signUp({
-        name: userType === 'restaurant' ? restaurantName : fullName,
+        name: fullName,
         email,
         password,
-        role: userType,
         phone: phone || undefined,
-        restaurantName: userType === 'restaurant' ? restaurantName : undefined,
-        restaurantAddress: userType === 'restaurant' ? restaurantAddress : undefined,
-        googleMapsLink: userType === 'restaurant' ? googleMapsLink : undefined,
       });
 
       router.replace('/(tabs)');
@@ -93,185 +73,107 @@ export default function SignUpScreen() {
   const isNetworkError = authError?.type === AuthErrorType.NETWORK_ERROR;
 
   return (
-        <KeyboardAvoidingView 
+    <KeyboardAvoidingView 
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
-    <ScrollView style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <ArrowLeft size={24} color="#111827" />
-      </TouchableOpacity>
+      <ScrollView 
+        style={styles.scrollView}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <ArrowLeft size={24} color="#111827" />
+        </TouchableOpacity>
 
-      <View style={styles.content}>
-        <Text style={styles.title}>Реєстрація</Text>
-        <Text style={styles.subtitle}>Створіть новий акаунт</Text>
+        <View style={styles.content}>
+          <Text style={styles.title}>Реєстрація</Text>
+          <Text style={styles.subtitle}>Створіть новий акаунт</Text>
 
-        {errorMessage ? (
-          <View style={[styles.errorContainer, isNetworkError && styles.errorContainerWarning]}>
-            <View style={styles.errorIconWrapper}>
-              {isNetworkError ? <WifiOff size={20} color="#ef4444" /> : <AlertCircle size={20} color="#ef4444" />}
+          {errorMessage ? (
+            <View style={[styles.errorContainer, isNetworkError && styles.errorContainerWarning]}>
+              <View style={styles.errorIconWrapper}>
+                {isNetworkError ? (
+                  <WifiOff size={20} color="#ef4444" />
+                ) : (
+                  <AlertCircle size={20} color="#ef4444" />
+                )}
+              </View>
+              <Text style={styles.errorText}>{errorMessage}</Text>
+              <TouchableOpacity onPress={clearError} style={styles.errorClose}>
+                <Text style={styles.errorCloseText}>✕</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={styles.errorText}>{errorMessage}</Text>
-            <TouchableOpacity onPress={clearError} style={styles.errorClose}>
-              <Text style={styles.errorCloseText}>✕</Text>
-            </TouchableOpacity>
-          </View>
-        ) : null}
+          ) : null}
 
-        <View style={styles.form}>
-          {/* Селектор типу користувача */}
-          <View style={styles.typeSelector}>
+          <View style={styles.form}>
+            <View style={styles.inputContainer}>
+              <UserIcon size={20} color="#9ca3af" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Повне ім'я *"
+                value={fullName}
+                placeholderTextColor="#9ca3af"
+                onChangeText={setFullName}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Mail size={20} color="#9ca3af" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Email *"
+                value={email}
+                placeholderTextColor="#9ca3af"
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Phone size={20} color="#9ca3af" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Телефон (необов'язково)"
+                value={phone}
+                placeholderTextColor="#9ca3af"
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Lock size={20} color="#9ca3af" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Пароль (мінімум 6 символів) *"
+                value={password}
+                placeholderTextColor="#9ca3af"
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+            </View>
+
             <TouchableOpacity
-              style={[styles.typeButton, userType === 'user' && styles.typeButtonActive]}
-              onPress={() => setUserType('user')}
+              style={[styles.button, authLoading && styles.buttonDisabled]}
+              onPress={handleSignUp}
+              disabled={authLoading}
             >
-              <UserIcon size={24} color={userType === 'user' ? '#ffffff' : '#6b7280'} />
-              <Text style={[styles.typeButtonText, userType === 'user' && styles.typeButtonTextActive]}>
-                Споживач
+              <Text style={styles.buttonText}>
+                {authLoading ? 'Реєстрація...' : 'Зареєструватися'}
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.typeButton, userType === 'restaurant' && styles.typeButtonActive]}
-              onPress={() => setUserType('restaurant')}
-            >
-              <Store size={24} color={userType === 'restaurant' ? '#ffffff' : '#6b7280'} />
-              <Text style={[styles.typeButtonText, userType === 'restaurant' && styles.typeButtonTextActive]}>
-                Ресторан
+            <TouchableOpacity onPress={() => router.push('/(auth)/signin')}>
+              <Text style={styles.linkText}>
+                Вже є акаунт? <Text style={styles.linkTextBold}>Увійти</Text>
               </Text>
             </TouchableOpacity>
           </View>
-
-          {userType === 'restaurant' ? (
-            <>
-              <View style={styles.inputContainer}>
-                <Store size={20} color="#9ca3af" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Назва ресторану *"
-                  value={restaurantName}
-                  placeholderTextColor="#9ca3af" 
-                  onChangeText={setRestaurantName}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <UserIcon size={20} color="#9ca3af" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Ім'я контактної особи"
-                  placeholderTextColor="#9ca3af" 
-                  value={fullName}
-                  onChangeText={setFullName}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Phone size={20} color="#9ca3af" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Телефон *"
-                  value={phone}
-                  placeholderTextColor="#9ca3af" 
-                  onChangeText={setPhone}
-                  keyboardType="phone-pad"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <MapPin size={20} color="#9ca3af" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Адреса *"
-                  value={restaurantAddress}
-                  placeholderTextColor="#9ca3af" 
-                  onChangeText={setRestaurantAddress}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <LinkIcon size={20} color="#9ca3af" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Посилання Google Maps *"
-                  value={googleMapsLink}
-                  placeholderTextColor="#9ca3af" 
-                  onChangeText={setGoogleMapsLink}
-                  autoCapitalize="none"
-                />
-              </View>
-            </>
-          ) : (
-            <>
-              <View style={styles.inputContainer}>
-                <UserIcon size={20} color="#9ca3af" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Повне ім'я *"
-                  value={fullName}
-                  placeholderTextColor="#9ca3af" 
-                  onChangeText={setFullName}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Phone size={20} color="#9ca3af" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Телефон (необов'язково)"
-                  value={phone}
-                  placeholderTextColor="#9ca3af" 
-                  onChangeText={setPhone}
-                  keyboardType="phone-pad"
-                />
-              </View>
-            </>
-          )}
-
-          <View style={styles.inputContainer}>
-            <Mail size={20} color="#9ca3af" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Email *"
-              value={email}
-              placeholderTextColor="#9ca3af" 
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Lock size={20} color="#9ca3af" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Пароль (мінімум 6 символів) *"
-              value={password}
-              placeholderTextColor="#9ca3af" 
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-          </View>
-
-          <TouchableOpacity
-            style={[styles.button, authLoading && styles.buttonDisabled]}
-            onPress={handleSignUp}
-            disabled={authLoading}
-          >
-            <Text style={styles.buttonText}>
-              {authLoading ? 'Реєстрація...' : 'Зареєструватися'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => router.push('/(auth)/signin')}>
-            <Text style={styles.linkText}>
-              Вже є акаунт? <Text style={styles.linkTextBold}>Увійти</Text>
-            </Text>
-          </TouchableOpacity>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -281,6 +183,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#ffffff',
   },
+  scrollView: {
+    flex: 1,
+  },
   backButton: {
     position: 'absolute',
     top: 60,
@@ -288,7 +193,6 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   content: {
-    flex: 1,
     paddingHorizontal: 24,
     paddingTop: 120,
     paddingBottom: 40,
@@ -304,45 +208,41 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     marginBottom: 32,
   },
-  errorText: {
+  errorContainer: {
+    flexDirection: 'row',
     backgroundColor: '#fee2e2',
-    color: '#ef4444',
     padding: 12,
+    paddingLeft: 14,
     borderRadius: 8,
     marginBottom: 16,
-    fontSize: 14,
+    alignItems: 'center',
+    borderLeftWidth: 4,
+    borderLeftColor: '#ef4444',
+  },
+  errorContainerWarning: {
+    backgroundColor: '#fef3c7',
+    borderLeftColor: '#f59e0b',
+  },
+  errorIconWrapper: {
+    marginRight: 10,
+  },
+  errorText: {
+    color: '#ef4444',
+    fontSize: 13,
+    flex: 1,
+    fontWeight: '500',
+  },
+  errorClose: {
+    padding: 4,
+    marginLeft: 8,
+  },
+  errorCloseText: {
+    color: '#ef4444',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   form: {
     gap: 16,
-  },
-  typeSelector: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 8,
-  },
-  typeButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f9fafb',
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#e5e7eb',
-    padding: 16,
-    gap: 8,
-  },
-  typeButtonActive: {
-    backgroundColor: '#10b981',
-    borderColor: '#10b981',
-  },
-  typeButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#6b7280',
-  },
-  typeButtonTextActive: {
-    color: '#ffffff',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -361,7 +261,6 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     fontSize: 16,
     color: '#111827',
-    
   },
   button: {
     backgroundColor: '#10b981',
@@ -386,49 +285,5 @@ const styles = StyleSheet.create({
   linkTextBold: {
     fontWeight: '600',
     color: '#10b981',
-  },
-    errorContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#fee2e2',
-    padding: 12,
-    paddingLeft: 14,
-    borderRadius: 8,
-    marginBottom: 16,
-    alignItems: 'center',
-    borderLeftWidth: 4,
-    borderLeftColor: '#ef4444',
-  },
-  errorContainerWarning: {
-    backgroundColor: '#fef3c7',
-    borderLeftColor: '#f59e0b',
-  },
-  errorIconWrapper: {
-    marginRight: 10,
-  },
-  errorClose: {
-    padding: 4,
-    marginLeft: 8,
-  },
-  errorCloseText: {
-    color: '#ef4444',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  eyeIcon: {
-    padding: 8,
-    marginRight: -8,
-  },
-  debugInfo: {
-    marginTop: 16,
-    padding: 12,
-    backgroundColor: '#f0fdf4',
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#22c55e',
-  },
-  debugText: {
-    fontSize: 12,
-    color: '#166534',
-    fontFamily: 'monospace',
   },
 });

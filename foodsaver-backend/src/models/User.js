@@ -1,33 +1,37 @@
+// models/User.js
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "Please provide a name"],
-    trim: true,
+    required: true,
   },
   email: {
     type: String,
-    required: [true, "Please provide an email"],
+    required: true,
     unique: true,
     lowercase: true,
-    match: [/^\S+@\S+\.\S+$/, "Please provide a valid email"],
   },
   password: {
     type: String,
-    required: [true, "Please provide a password"],
-    minlength: 6,
+    required: true,
     select: false,
+    minlength: 6,
   },
   phone: {
     type: String,
-    trim: true,
+    default: null,
   },
   role: {
     type: String,
-    enum: ["user", "restaurant", "admin"],
+    enum: ["user", "restaurant_owner", "admin"],
     default: "user",
+  },
+  restaurant: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Restaurant",
+    default: null,
   },
   location: {
     type: {
@@ -36,8 +40,7 @@ const userSchema = new mongoose.Schema({
       default: "Point",
     },
     coordinates: {
-      type: [Number], // [longitude, latitude]
-      default: [0, 0],
+      type: [Number],
     },
   },
   createdAt: {
@@ -46,23 +49,29 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// Геопросторовий індекс для пошуку поблизу
+// Геоіндекс для пошуку за координатами
 userSchema.index({ location: "2dsphere" });
 
-// Хешування паролю перед збереженням
+// Хеш паролю перед збереженням
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
-    return next();
+    next();
   }
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
 });
 
 // Метод для перевірки паролю
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// Не включаємо пароль при запиті
+userSchema.methods.toJSON = function () {
+  const obj = this.toObject();
+  delete obj.password;
+  return obj;
 };
 
 module.exports = mongoose.model("User", userSchema);

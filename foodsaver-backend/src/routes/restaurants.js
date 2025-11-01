@@ -1,35 +1,59 @@
+// routes/restaurants.js
 const express = require("express");
+const { body, param } = require("express-validator");
+const restaurantController = require("../controllers/restaurantController");
+const { protect } = require("../middleware/auth");
+
 const router = express.Router();
-const {
-  getRestaurants,
-  getRestaurant,
-  createRestaurant,
-  updateRestaurant,
-  deleteRestaurant,
-} = require("../controllers/restaurantController");
-const { protect, authorize } = require("../middleware/auth");
-const { restaurantValidation } = require("../utils/validators");
 
-router.get("/", getRestaurants);
-router.get("/:id", getRestaurant);
+// GET all restaurants
+router.get("/", restaurantController.getRestaurants);
 
-// захищені ендпоінти
+// GET restaurant by user ID
+router.get("/user/:userId", restaurantController.getRestaurantByUser);
 
+// POST create restaurant
 router.post(
   "/",
   protect,
-  authorize("restaurant", "admin"),
-  restaurantValidation,
-  createRestaurant
+  [
+    body("name").trim().notEmpty().withMessage("Name is required"),
+    body("phone")
+      .trim()
+      .notEmpty()
+      .withMessage("Phone is required")
+      .matches(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/)
+      .withMessage("Invalid phone format"),
+    body("address").trim().notEmpty().withMessage("Address is required"),
+    body("googleMapsLink")
+      .trim()
+      .notEmpty()
+      .withMessage("Google Maps link is required")
+      .matches(/(google\.com\/maps|goo\.gl)/)
+      .withMessage("Invalid Google Maps link format"),
+    body("description").optional().trim(),
+  ],
+  restaurantController.createRestaurant
 );
 
-router.put("/:id", protect, authorize("restaurant", "admin"), updateRestaurant);
-
-router.delete(
+// PUT update restaurant
+router.put(
   "/:id",
   protect,
-  authorize("restaurant", "admin"),
-  deleteRestaurant
+  [
+    body("name").optional().trim().notEmpty(),
+    body("phone").optional().trim(),
+    body("address").optional().trim(),
+    body("googleMapsLink")
+      .optional()
+      .trim()
+      .matches(/(google\.com\/maps|goo\.gl)/),
+    body("description").optional().trim(),
+  ],
+  restaurantController.updateRestaurant
 );
+
+// DELETE restaurant
+router.delete("/:id", protect, restaurantController.deleteRestaurant);
 
 module.exports = router;

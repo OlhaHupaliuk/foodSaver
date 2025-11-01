@@ -38,3 +38,72 @@ exports.findNearby = async (Model, longitude, latitude, maxDistance = 5000) => {
     },
   });
 };
+// utils/geolocation.js
+const axios = require("axios");
+
+/**
+ * Витягує координати з Google Maps посилання
+ * Приклади посилань:
+ * https://maps.google.com/?q=50.4501,30.5234
+ * https://goo.gl/maps/ABC123
+ * https://www.google.com/maps/place/50.4501,30.5234
+ */
+const extractCoordinatesFromMapsLink = (mapsLink) => {
+  try {
+    // Паттерн для координат у посиланні
+    const coordPattern = /(?:q=|place\/)(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+    const match = mapsLink.match(coordPattern);
+
+    if (match) {
+      const latitude = parseFloat(match[1]);
+      const longitude = parseFloat(match[2]);
+
+      // Валідація координат
+      if (
+        latitude >= -90 &&
+        latitude <= 90 &&
+        longitude >= -180 &&
+        longitude <= 180
+      ) {
+        return [longitude, latitude]; // MongoDB формат: [longitude, latitude]
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error extracting coordinates:", error);
+    return null;
+  }
+};
+
+/**
+ * Геокодування адреси через Google Geocoding API
+ */
+const geocodeAddress = async (address) => {
+  try {
+    const response = await axios.get(
+      "https://maps.googleapis.com/maps/api/geocode/json",
+      {
+        params: {
+          address: address,
+          key: process.env.GOOGLE_MAPS_API_KEY,
+        },
+      }
+    );
+
+    if (response.data.results && response.data.results.length > 0) {
+      const location = response.data.results[0].geometry.location;
+      return [location.lng, location.lat]; // MongoDB формат
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error geocoding address:", error);
+    return null;
+  }
+};
+
+module.exports = {
+  extractCoordinatesFromMapsLink,
+  geocodeAddress,
+};

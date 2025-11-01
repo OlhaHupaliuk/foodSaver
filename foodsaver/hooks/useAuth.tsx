@@ -9,7 +9,6 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<AuthError | null>(null);
 
-  // Перевіряємо токен при завантаженні
   useEffect(() => {
     bootstrapAsync();
   }, []);
@@ -31,7 +30,6 @@ export const useAuth = () => {
         } catch (err: any) {
           console.log('Failed to fetch user:', err.message);
           
-          // Токен неактуальний - видаляємо
           await AsyncStorage.removeItem('authToken');
           await AsyncStorage.removeItem('authUser');
           setToken(null);
@@ -65,7 +63,6 @@ export const useAuth = () => {
         name: data.name,
         email: data.email,
         password: data.password,
-        role: data.role === 'user' ? 'user' : 'restaurant',
         phone: data.phone,
       });
 
@@ -88,7 +85,6 @@ export const useAuth = () => {
 
       let authError: AuthError;
 
-      // Обробка різних типів помилок
       if (errorMessage.includes('already exists')) {
         authError = {
           type: AuthErrorType.USER_EXISTS,
