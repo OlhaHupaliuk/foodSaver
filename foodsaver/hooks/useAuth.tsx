@@ -156,7 +156,7 @@ export const useAuth = () => {
       } else if (errorMessage.includes('Network') || errorMessage.includes('request failed')) {
         authError = {
           type: AuthErrorType.NETWORK_ERROR,
-          message: 'Помилка мережи. Переконайтеся що сервер запущен та доступний.',
+          message: 'Помилка мережі. Переконайтеся що сервер запущений та доступний.',
           details: errorMessage,
         };
       } else if (errorMessage.includes('500')) {

@@ -1,7 +1,19 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import {
+  Text,
+  TextInput,
+  Button,
+  ActivityIndicator,
+} from 'react-native-paper';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
-import { ArrowLeft, Mail, Lock, User as UserIcon, Phone, WifiOff, AlertCircle } from 'lucide-react-native';
 import { useAuth } from '../../hooks/useAuth';
 import { AuthErrorType } from '../../types/auth';
 
@@ -11,15 +23,14 @@ export default function SignUpScreen() {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [localError, setLocalError] = useState('');
+
   const { signUp, loading: authLoading, error: authError, clearError } = useAuth();
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const validateEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const validatePhone = (phone: string) => {
-    if (!phone) return true; // Телефон необов'язковий
+    if (!phone) return true;
     const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
     return phoneRegex.test(phone);
   };
@@ -28,12 +39,12 @@ export default function SignUpScreen() {
     setLocalError('');
 
     if (!email || !password || !fullName) {
-      setLocalError('Будь ласка, заповніть усі обов\'язкові поля');
+      setLocalError("Будь ласка, заповніть усі обов'язкові поля");
       return;
     }
 
     if (!validateEmail(email)) {
-      setLocalError('Введіть коректну email адресу');
+      setLocalError('Введіть коректний email');
       return;
     }
 
@@ -42,14 +53,14 @@ export default function SignUpScreen() {
       return;
     }
 
-    if (phone && !validatePhone(phone)) {
-      setLocalError('Введіть коректний номер телефону');
+    if (!validatePhone(phone)) {
+      setLocalError('Некоректний номер телефону');
       return;
     }
 
     try {
       clearError();
-      
+
       await signUp({
         name: fullName,
         email,
@@ -58,119 +69,145 @@ export default function SignUpScreen() {
       });
 
       router.replace('/(tabs)');
-    } catch (err: any) {
+    } catch (err) {
       console.log('Sign up error:', err);
     }
   };
 
-  const getErrorMessage = () => {
-    if (localError) return localError;
-    if (!authError) return '';
-    if (authError.type) return authError.message;
-  };
-
-  const errorMessage = getErrorMessage();
+  const errorMessage = localError || authError?.message || '';
   const isNetworkError = authError?.type === AuthErrorType.NETWORK_ERROR;
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <ArrowLeft size={24} color="#111827" />
-        </TouchableOpacity>
+
+        <View style={styles.backButton}>
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={28}
+            color="#333"
+            onPress={() => router.back()}
+          />
+        </View>
 
         <View style={styles.content}>
-          <Text style={styles.title}>Реєстрація</Text>
-          <Text style={styles.subtitle}>Створіть новий акаунт</Text>
+          <Text variant="headlineLarge" style={styles.title}>
+            Реєстрація
+          </Text>
+          <Text variant="bodyLarge" style={styles.subtitle}>
+            Створіть новий акаунт
+          </Text>
 
+          {/* Error */}
           {errorMessage ? (
-            <View style={[styles.errorContainer, isNetworkError && styles.errorContainerWarning]}>
-              <View style={styles.errorIconWrapper}>
-                {isNetworkError ? (
-                  <WifiOff size={20} color="#ef4444" />
-                ) : (
-                  <AlertCircle size={20} color="#ef4444" />
-                )}
-              </View>
+            <View
+              style={[
+                styles.errorContainer,
+                isNetworkError && {
+                  backgroundColor: '#FEF3C7',
+                  borderLeftColor: '#F59E0B',
+                },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name={isNetworkError ? 'wifi-off' : 'alert-circle-outline'}
+                size={20}
+                color="#EF4444"
+                style={{ marginRight: 8 }}
+              />
               <Text style={styles.errorText}>{errorMessage}</Text>
-              <TouchableOpacity onPress={clearError} style={styles.errorClose}>
-                <Text style={styles.errorCloseText}>✕</Text>
-              </TouchableOpacity>
+              <MaterialCommunityIcons
+                name="close"
+                size={20}
+                color="#EF4444"
+                onPress={clearError}
+              />
             </View>
           ) : null}
 
           <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <UserIcon size={20} color="#9ca3af" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Повне ім'я *"
-                value={fullName}
-                placeholderTextColor="#9ca3af"
-                onChangeText={setFullName}
-              />
-            </View>
+            <TextInput
+              label="Повне ім'я *"
+              mode="outlined"
+              left={<TextInput.Icon icon="account-outline" />}
+              value={fullName}
+              activeOutlineColor="#6b6b6bff" 
+              onChangeText={(t) => {
+                setFullName(t);
+                setLocalError('');
+              }}
+            />
 
-            <View style={styles.inputContainer}>
-              <Mail size={20} color="#9ca3af" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Email *"
-                value={email}
-                placeholderTextColor="#9ca3af"
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-              />
-            </View>
+            {/* Email */}
+            <TextInput
+              label="Email *"
+              mode="outlined"
+              left={<TextInput.Icon icon="email-outline" />}
+              activeOutlineColor="#6b6b6bff" 
+              value={email}
+              onChangeText={(t) => {
+                setEmail(t);
+                setLocalError('');
+              }}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
 
-            <View style={styles.inputContainer}>
-              <Phone size={20} color="#9ca3af" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Телефон (необов'язково)"
-                value={phone}
-                placeholderTextColor="#9ca3af"
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-              />
-            </View>
+            <TextInput
+              label="Телефон (необов'язково)"
+              mode="outlined" 
+              activeOutlineColor="#6b6b6bff" 
+              left={<TextInput.Icon icon="phone-outline" />}
+              value={phone}
+              onChangeText={(t) => {
+                setPhone(t);
+                setLocalError('');
+              }}
+              keyboardType="phone-pad"
+            />
 
-            <View style={styles.inputContainer}>
-              <Lock size={20} color="#9ca3af" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Пароль (мінімум 6 символів) *"
-                value={password}
-                placeholderTextColor="#9ca3af"
-                onChangeText={setPassword}
-                secureTextEntry
-              />
-            </View>
+            <TextInput
+              label="Пароль *"
+              mode="outlined"
+              left={<TextInput.Icon icon="lock-outline" />}
+              secureTextEntry
+              value={password}    
+              activeOutlineColor="#6b6b6bff" 
+              onChangeText={(t) => {
+                setPassword(t);
+                setLocalError('');
+              }}
+            />
 
-            <TouchableOpacity
-              style={[styles.button, authLoading && styles.buttonDisabled]}
+            <Button
+              mode="contained"
               onPress={handleSignUp}
               disabled={authLoading}
+              style={styles.button}
+              contentStyle={{ paddingVertical: 10 }}
             >
-              <Text style={styles.buttonText}>
-                {authLoading ? 'Реєстрація...' : 'Зареєструватися'}
-              </Text>
-            </TouchableOpacity>
+              {authLoading ? (
+                <ActivityIndicator animating color="#fff" />
+              ) : (
+                'Зареєструватися'
+              )}
+            </Button>
 
-            <TouchableOpacity onPress={() => router.push('/(auth)/signin')}>
-              <Text style={styles.linkText}>
-                Вже є акаунт? <Text style={styles.linkTextBold}>Увійти</Text>
-              </Text>
-            </TouchableOpacity>
+            <Button
+              onPress={() => router.push('/(auth)/signin')}
+              disabled={authLoading}
+              textColor="#10b981"
+              style={{ marginTop: 12 }}
+            >
+              Вже є акаунт? Увійти
+            </Button>
           </View>
         </View>
       </ScrollView>
@@ -179,111 +216,57 @@ export default function SignUpScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-  },
-  scrollView: {
-    flex: 1,
-  },
+  container: { flex: 1, backgroundColor: '#fff' },
+
+  scrollView: { flex: 1 },
+
   backButton: {
     position: 'absolute',
     top: 60,
     left: 20,
     zIndex: 10,
   },
+
   content: {
     paddingHorizontal: 24,
     paddingTop: 120,
     paddingBottom: 40,
   },
+
   title: {
-    fontSize: 32,
     fontWeight: 'bold',
-    color: '#111827',
     marginBottom: 8,
   },
+
   subtitle: {
-    fontSize: 16,
-    color: '#6b7280',
+    color: '#6B7280',
     marginBottom: 32,
   },
-  errorContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#fee2e2',
-    padding: 12,
-    paddingLeft: 14,
-    borderRadius: 8,
-    marginBottom: 16,
-    alignItems: 'center',
-    borderLeftWidth: 4,
-    borderLeftColor: '#ef4444',
-  },
-  errorContainerWarning: {
-    backgroundColor: '#fef3c7',
-    borderLeftColor: '#f59e0b',
-  },
-  errorIconWrapper: {
-    marginRight: 10,
-  },
-  errorText: {
-    color: '#ef4444',
-    fontSize: 13,
-    flex: 1,
-    fontWeight: '500',
-  },
-  errorClose: {
-    padding: 4,
-    marginLeft: 8,
-  },
-  errorCloseText: {
-    color: '#ef4444',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
+
   form: {
     gap: 16,
   },
-  inputContainer: {
+
+  button: {
+    marginTop: 16,
+    borderRadius: 12,
+    backgroundColor: '#10b981',
+  },
+
+  errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    paddingHorizontal: 16,
+    backgroundColor: '#FEE2E2',
+    borderLeftWidth: 4,
+    borderLeftColor: '#EF4444',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 16,
   },
-  inputIcon: {
-    marginRight: 12,
-  },
-  input: {
+
+  errorText: {
+    color: '#EF4444',
     flex: 1,
-    paddingVertical: 16,
-    fontSize: 16,
-    color: '#111827',
-  },
-  button: {
-    backgroundColor: '#10b981',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-  linkText: {
-    fontSize: 14,
-    color: '#6b7280',
-    textAlign: 'center',
-  },
-  linkTextBold: {
-    fontWeight: '600',
-    color: '#10b981',
+    fontSize: 13,
   },
 });
