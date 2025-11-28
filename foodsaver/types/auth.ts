@@ -107,7 +107,7 @@ export interface Order {
   }>;
   totalAmount: number;
   totalDiscount?: number;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'ready' | 'completed' | 'cancelled';
   pickupTime: string;
   createdAt?: string;
   updatedAt?: string;

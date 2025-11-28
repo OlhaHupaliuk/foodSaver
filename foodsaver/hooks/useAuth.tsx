@@ -2,8 +2,9 @@ import { useEffect, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../services/api';
 import { AuthUser, SignUpData, AuthError, AuthErrorType } from '../types/auth';
+import type { AuthContextType } from '../contexts/AuthContext';
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -11,6 +12,16 @@ export const useAuth = () => {
 
   useEffect(() => {
     bootstrapAsync();
+  }, []);
+
+  const fetchCurrentUser = useCallback(async () => {
+    const response = await api.auth.getMe();
+    if (response.status === 'success' && response.data?.user) {
+      setUser(response.data.user);
+      await AsyncStorage.setItem('authUser', JSON.stringify(response.data.user));
+      return response.data.user;
+    }
+    return null;
   }, []);
 
   const bootstrapAsync = useCallback(async () => {
@@ -23,13 +34,10 @@ export const useAuth = () => {
       if (savedToken) {
         setToken(savedToken);
         try {
-          const response = await api.auth.getMe();
-          if (response.status === 'success' && response.data?.user) {
-            setUser(response.data.user);
-          }
+          await fetchCurrentUser();
         } catch (err: any) {
           console.log('Failed to fetch user:', err.message);
-          
+
           await AsyncStorage.removeItem('authToken');
           await AsyncStorage.removeItem('authUser');
           setToken(null);
@@ -50,7 +58,7 @@ export const useAuth = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchCurrentUser]);
 
   const signUp = useCallback(async (data: SignUpData) => {
     try {
@@ -59,7 +67,6 @@ export const useAuth = () => {
 
       console.log('Signing up with:', data.email);
 
-      // Передаємо тільки базові поля для реєстрації
       const response = await api.auth.register({
         name: data.name,
         email: data.email,
@@ -202,6 +209,23 @@ export const useAuth = () => {
     }
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      if (!token) {
+        return null;
+      }
+      return await fetchCurrentUser();
+    } catch (err: any) {
+      console.error('Refresh user error:', err);
+      setError({
+        type: AuthErrorType.UNKNOWN,
+        message: 'Не вдалося оновити профіль. Спробуйте ще раз.',
+        details: err.message,
+      });
+      throw err;
+    }
+  }, [token, fetchCurrentUser]);
+
   const clearError = useCallback(() => {
     setError(null);
   }, []);
@@ -214,6 +238,7 @@ export const useAuth = () => {
     signUp,
     signIn,
     signOut,
+    refreshUser,
     clearError,
     isAuthenticated: !!token,
   };
