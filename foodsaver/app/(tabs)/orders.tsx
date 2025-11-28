@@ -1,12 +1,13 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useState, useEffect } from 'react';
 import { formatPrice, formatDateTime } from '../../utils/format';
 import { useAuth } from '../../hooks/useAuth';
 import { api } from '../../services/api';
+import { Order } from '../../types/auth';
 
 export default function OrdersScreen() {
   const { user } = useAuth();
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -14,34 +15,16 @@ export default function OrdersScreen() {
     }
   }, [user]);
 
-const loadOrders = async () => {
-  try {
-    const response = await api.orders.getAll();
-    if (response.status === 'success' && response.data) {
-      setOrders(response.data.orders || []);
+  const loadOrders = async () => {
+    try {
+      const response = await api.orders.getAll();
+      if (response.status === 'success' && response.data) {
+        setOrders(response.data.orders || []);
+      }
+    } catch (error) {
+      console.error('Error loading orders:', error);
     }
-  } catch (error) {
-    console.error('Error loading orders:', error);
-  }
-};
-
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case 'pending':
-      return '⏳';
-    case 'confirmed':
-      return '✅';
-    case 'ready':
-      return '🍽️';
-    case 'completed':
-      return '🎉';
-    case 'cancelled':
-      return '❌';
-    default:
-      return '❓';
-  }
-};
-
+  };
 
   const getStatusText = (status: string) => {
     const statusMap: Record<string, string> = {
@@ -52,6 +35,17 @@ const getStatusIcon = (status: string) => {
       cancelled: 'Скасовано',
     };
     return statusMap[status] || status;
+  };
+
+  const getOrderSummary = (order: Order) => {
+    if (!order.items?.length) {
+      return '—';
+    }
+    const firstItem = order.items[0];
+    const remaining = order.items.length - 1;
+    const firstTitle =
+      typeof firstItem.foodItem !== 'string' ? firstItem.foodItem.title : 'Позиція';
+    return remaining > 0 ? `${firstTitle} +${remaining}` : firstTitle;
   };
 
   return (
@@ -69,21 +63,23 @@ const getStatusIcon = (status: string) => {
           orders.map((order) => (
             <TouchableOpacity key={order.id} style={styles.orderCard}>
               <View style={styles.orderHeader}>
-                <Text style={styles.restaurantName}>{order.restaurant?.name}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.restaurantName}>{order.restaurant && typeof order.restaurant !== 'string' ? order.restaurant.name : 'Ресторан'}</Text>
+                  <Text style={styles.orderSummary}>{getOrderSummary(order)}</Text>
+                </View>
                 <View style={styles.statusBadge}>
-                  Completed
                   <Text style={styles.statusText}>{getStatusText(order.status)}</Text>
                 </View>
               </View>
 
               <View style={styles.orderDetails}>
-                <Text style={styles.orderPrice}>{formatPrice(order.total_price)}</Text>
-                <Text style={styles.orderDate}>{formatDateTime(order.created_at)}</Text>
+                <Text style={styles.orderPrice}>{formatPrice(order.totalAmount)}</Text>
+                <Text style={styles.orderDate}>{order.createdAt ? formatDateTime(order.createdAt) : ''}</Text>
               </View>
 
-              {order.pickup_time && (
+              {order.pickupTime && (
                 <Text style={styles.pickupTime}>
-                  Час забору: {new Date(order.pickup_time).toLocaleString('uk-UA')}
+                  Забір: {new Date(order.pickupTime).toLocaleString('uk-UA')}
                 </Text>
               )}
             </TouchableOpacity>
@@ -147,6 +143,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#111827',
     flex: 1,
+  },
+  orderSummary: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginTop: 2,
   },
   statusBadge: {
     flexDirection: 'row',

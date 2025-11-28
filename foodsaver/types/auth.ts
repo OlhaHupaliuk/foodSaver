@@ -1,4 +1,9 @@
 // types/auth.ts
+export interface GeoLocation {
+  type: 'Point';
+  coordinates: [number, number]; // [longitude, latitude]
+}
+
 export interface Restaurant {
   id: string;
   name: string;
@@ -10,6 +15,7 @@ export interface Restaurant {
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
+  location?: GeoLocation;
 }
 
 export interface AuthUser {
@@ -83,6 +89,9 @@ export interface FoodItem {
   restaurant: Restaurant | string;
   isAvailable: boolean;
   expiryTime: string;
+  location?: GeoLocation;
+  imageUrl?: string;
+  distance?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -90,10 +99,16 @@ export interface FoodItem {
 export interface Order {
   id: string;
   user: string;
-  foodItem: FoodItem;
-  quantity: number;
-  totalPrice: number;
+  restaurant: Restaurant | string;
+  items: Array<{
+    foodItem: FoodItem | string;
+    quantity: number;
+    price: number;
+  }>;
+  totalAmount: number;
+  totalDiscount?: number;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  pickupTime: string;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -6,11 +6,14 @@ import { getTimeUntilExpiry } from '../../utils/discount';
 import { router } from 'expo-router';
 import { useAuth } from '../../hooks/useAuth';
 import { api } from '../../services/api';
+import { FoodItem } from '../../types/auth';
+import { useOrderActions } from '../../hooks/useOrderActions';
 
 export default function HomeScreen() {
-  const [foodItems, setFoodItems] = useState<any[]>([]);
+  const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
 
   const { user } = useAuth();
+  const { orderingItemId, confirmAndPlaceOrder } = useOrderActions();
 
   useEffect(() => {
     loadFoodItems();
@@ -54,31 +57,38 @@ export default function HomeScreen() {
           <View style={styles.foodList}>
             <Text style={styles.sectionTitle}>Найближчі </Text>
             {foodItems.map((item) => (
-              <TouchableOpacity key={item.id} style={styles.foodCard}>
+              <TouchableOpacity
+                key={item.id}
+                style={[styles.foodCard, (!item.isAvailable || orderingItemId === item.id) && styles.disabledCard]}
+                onPress={() => confirmAndPlaceOrder(item)}
+                disabled={!item.isAvailable || orderingItemId === item.id}
+              >
                 <Image
-                  source={{ uri: item.image_url || 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg' }}
+                  source={{ uri: item.imageUrl || 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg' }}
                   style={styles.foodImage}
                 />
                 <View style={styles.foodInfo}>
                   <Text style={styles.foodTitle}>{item.title}</Text>
                   <View style={styles.restaurantInfo}>
                     <MapPin size={14} color="#6b7280" />
-                    <Text style={styles.restaurantName}>{item.restaurant?.name}</Text>
+                    <Text style={styles.restaurantName}>
+                      {typeof item.restaurant !== 'string' ? item.restaurant?.name : ''}
+                    </Text>
                   </View>
                   <View style={styles.priceRow}>
                     <View style={styles.priceContainer}>
-                      <Text style={styles.originalPrice}>{formatPrice(item.original_price)}</Text>
-                      <Text style={styles.discountPrice}>{formatPrice(item.discount_price)}</Text>
+                      <Text style={styles.originalPrice}>{formatPrice(item.originalPrice)}</Text>
+                      <Text style={styles.discountPrice}>{formatPrice(item.discountedPrice)}</Text>
                     </View>
                     <View style={styles.timeContainer}>
                       <Clock size={14} color="#ef4444" />
-                      <Text style={styles.timeText}>{getTimeUntilExpiry(item.expiry_time)}</Text>
+                      <Text style={styles.timeText}>{getTimeUntilExpiry(item.expiryTime)}</Text>
                     </View>
                   </View>
                   <View style={styles.discountBadge}>
                     <Percent size={12} color="#ffffff" />
                     <Text style={styles.discountText}>
-                      {Math.round((1 - item.discount_price / item.original_price) * 100)}%
+                      {Math.round((1 - (item.discountedPrice ?? 0) / (item.originalPrice || 1)) * 100)}%
                     </Text>
                   </View>
                 </View>
@@ -230,5 +240,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: '#ffffff',
+  },
+  disabledCard: {
+    opacity: 0.6,
   },
 });
