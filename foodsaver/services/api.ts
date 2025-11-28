@@ -103,7 +103,7 @@ export const api = {
   foodItems: {
     getAll: (params?: { restaurant?: string; category?: string; maxPrice?: number }) => {
       const queryString = params ? `?${new URLSearchParams(params as any).toString()}` : '';
-      return api.request(`/food-items${queryString}`, {
+      return api.request<{ items: FoodItem[] }>(`/food-items${queryString}`, {
         method: 'GET',
       });
     },

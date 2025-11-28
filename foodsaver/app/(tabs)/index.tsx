@@ -16,16 +16,16 @@ export default function HomeScreen() {
     loadFoodItems();
   }, []);
 
-const loadFoodItems = async () => {
-  try {
-    const response = await api.foodItems.getAll(); // або getNearby(user.location)
-    if (response.status === 'success' && response.data) {
-      setFoodItems(response.data.items || []);
+  const loadFoodItems = async () => {
+    try {
+      const response = await api.foodItems.getAll(); // або getNearby(user.location)
+      if (response.status === 'success') {
+        setFoodItems(response.data?.items ?? []);
+      }
+    } catch (error) {
+      console.error('Error loading food items:', error);
     }
-  } catch (error) {
-    console.error('Error loading food items:', error);
-  }
-};
+  };
 
   const isRestaurant = user?.role === 'restaurant_owner';
 

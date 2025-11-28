@@ -2,7 +2,7 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { AuthUser, AuthError } from '../types/auth';
 
-type AuthContextType = {
+export type AuthContextType = {
   user: AuthUser | null;
   token: string | null;
   loading: boolean;
@@ -10,6 +10,7 @@ type AuthContextType = {
   signUp: (data: any) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  refreshUser: () => Promise<AuthUser | null>;
   clearError: () => void;
   isAuthenticated: boolean;
 };
@@ -17,7 +18,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const auth = useAuth();
+  const auth = useAuth() as AuthContextType;
   return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 };
 

@@ -1,5 +1,11 @@
-export function formatPrice(price: number): string {
-  return `${price.toFixed(0)}₴`;
+export function formatPrice(price?: number | null): string {
+  const numericPrice = typeof price === 'number' ? price : Number(price);
+
+  if (Number.isFinite(numericPrice)) {
+    return `${numericPrice.toFixed(0)}₴`;
+  }
+
+  return '—';
 }
 
 export function formatDateTime(dateString: string): string {

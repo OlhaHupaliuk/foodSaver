@@ -1,10 +1,44 @@
 import { Tabs, Redirect } from 'expo-router';
+import { ActivityIndicator, View } from 'react-native';
 import { Home, Search, ShoppingBag, Store, User } from 'lucide-react-native';
 import { useAuth } from '../../hooks/useAuth';
 
+type TabConfig = {
+  name: string;
+  title: string;
+  Icon: typeof Home;
+};
+
+const customerTabs: TabConfig[] = [
+  { name: 'index', title: 'Головна', Icon: Home },
+  { name: 'explore', title: 'Пошук', Icon: Search },
+  { name: 'orders', title: 'Замовлення', Icon: ShoppingBag },
+  { name: 'profile', title: 'Профіль', Icon: User },
+];
+
+const restaurantTabs: TabConfig[] = [
+  { name: 'index', title: 'Головна', Icon: Home },
+  { name: 'orders', title: 'Замовлення', Icon: ShoppingBag },
+  { name: 'manage', title: 'Управління', Icon: Store },
+  { name: 'profile', title: 'Профіль', Icon: User },
+];
+
 export default function TabLayout() {
-  const { user } = useAuth();
-  const isRestaurant = user?.role === 'restaurant_owner';
+  const { user, loading, isAuthenticated } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' }}>
+        <ActivityIndicator size="large" color="#10b981" />
+      </View>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Redirect href="/(auth)/welcome" />;
+  }
+
+  const tabsToRender = user?.role === 'restaurant_owner' ? restaurantTabs : customerTabs;
 
   return (
     <Tabs
@@ -26,45 +60,16 @@ export default function TabLayout() {
         },
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Головна',
-          tabBarIcon: ({ size, color }) => <Home size={size} color={color} />,
-        }}
-      />
-      {!isRestaurant && (
+      {tabsToRender.map(({ name, title, Icon }) => (
         <Tabs.Screen
-          name="explore"
+          key={name}
+          name={name}
           options={{
-            title: 'Пошук',
-            tabBarIcon: ({ size, color }) => <Search size={size} color={color} />,
+            title,
+            tabBarIcon: ({ size, color }) => <Icon size={size} color={color} />,
           }}
         />
-      )}
-      <Tabs.Screen
-        name="orders"
-        options={{
-          title: 'Замовлення',
-          tabBarIcon: ({ size, color }) => <ShoppingBag size={size} color={color} />,
-        }}
-      />
-      {isRestaurant && (
-        <Tabs.Screen
-          name="manage"
-          options={{
-            title: 'Управління',
-            tabBarIcon: ({ size, color }) => <Store size={size} color={color} />,
-          }}
-        />
-      )}
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Профіль',
-          tabBarIcon: ({ size, color }) => <User size={size} color={color} />,
-        }}
-      />
+      ))}
     </Tabs>
   );
 }
