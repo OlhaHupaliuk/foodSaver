@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthResponse, AuthLoginResponse, GetMeResponse, AuthUser, AuthError, AuthErrorType, FoodItem } from '../types/auth';
 
-const API_URL = 'http://172.20.10.12:5000/api';
+const API_URL = 'http://192.168.0.100:5000/api';
 
 interface FetchOptions extends RequestInit {
   skipAuth?: boolean;
@@ -163,5 +163,43 @@ export const api = {
       api.request(`/orders/${id}`, {
         method: 'DELETE',
       }),
+  },
+
+  reviews: {
+    getByRestaurant: (restaurantId: string) =>
+      api.request(`/reviews/restaurant/${restaurantId}`, {
+        method: 'GET',
+      }),
+
+    getByFoodItem: (foodItemId: string) =>
+      api.request(`/reviews/food-item/${foodItemId}`, {
+        method: 'GET',
+      }),
+
+    create: (data: any) =>
+      api.request('/reviews', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+
+    update: (id: string, data: any) =>
+      api.request(`/reviews/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+
+    delete: (id: string) =>
+      api.request(`/reviews/${id}`, {
+        method: 'DELETE',
+      }),
+  },
+
+  statistics: {
+    getRestaurantStats: (restaurantId: string, period?: 'all' | 'week' | 'month' | 'year') => {
+      const queryString = period ? `?period=${period}` : '';
+      return api.request(`/statistics/restaurant/${restaurantId}${queryString}`, {
+        method: 'GET',
+      });
+    },
   },
 };

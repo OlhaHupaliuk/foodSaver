@@ -1,6 +1,8 @@
 // models/FoodItem.js
 const mongoose = require("mongoose");
 
+const DEFAULT_LOCATION = [24.0297, 49.8397]; // [longitude, latitude] for Lviv
+
 const foodItemSchema = new mongoose.Schema(
   {
     title: {
@@ -40,9 +42,36 @@ const foodItemSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    // Location inherited from restaurant (for map display)
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number],
+        required: true,
+        default: DEFAULT_LOCATION,
+        validate: {
+          validator: (value) =>
+            Array.isArray(value) &&
+            value.length === 2 &&
+            value.every((num) => typeof num === "number"),
+          message:
+            "Location coordinates must be an array [longitude, latitude]",
+        },
+      },
+    },
   },
   { timestamps: true }
 );
+
+// Index for geospatial queries
+foodItemSchema.index({ location: "2dsphere" });
+
+// Defer index creation until we clean up existing records
+foodItemSchema.set("autoIndex", false);
 
 foodItemSchema.methods.checkAvailability = function () {
   if (new Date() > this.expiryTime || this.quantity <= 0) {

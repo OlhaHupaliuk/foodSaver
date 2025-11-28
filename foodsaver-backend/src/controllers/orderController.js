@@ -14,8 +14,8 @@ exports.getOrders = async (req, res, next) => {
       query.user = req.user._id;
     }
     // Власники ресторанів бачать замовлення своїх ресторанів
-    else if (req.user.role === "restaurant") {
-      query.restaurant = { $in: req.user.restaurants }; // потрібно додати поле restaurants в User model
+    else if (req.user.role === "restaurant_owner" && req.user.restaurant) {
+      query.restaurant = req.user.restaurant;
     }
     // Адміни бачать всі замовлення
 
@@ -126,6 +126,8 @@ exports.createOrder = async (req, res, next) => {
         foodItem: item.foodItem,
         quantity: item.quantity,
         price: foodItem.discountedPrice,
+        originalPrice: foodItem.originalPrice,
+        discountedPrice: foodItem.discountedPrice,
       });
 
       // Зменшуємо кількість в наявності
@@ -136,12 +138,20 @@ exports.createOrder = async (req, res, next) => {
       await foodItem.save();
     }
 
+    // Calculate total discount
+    let totalDiscount = 0;
+    orderItems.forEach((item) => {
+      totalDiscount +=
+        (item.originalPrice - item.discountedPrice) * item.quantity;
+    });
+
     // Створення замовлення
     const order = await Order.create({
       user: req.user._id,
       restaurant,
       items: orderItems,
       totalAmount,
+      totalDiscount,
       pickupTime,
       notes,
     });

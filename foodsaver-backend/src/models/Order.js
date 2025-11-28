@@ -27,12 +27,24 @@ const orderSchema = new mongoose.Schema({
         type: Number,
         required: true,
       },
+      originalPrice: {
+        type: Number,
+        required: false, // Store original price for statistics
+      },
+      discountedPrice: {
+        type: Number,
+        required: false, // Store discounted price for statistics
+      },
     },
   ],
   totalAmount: {
     type: Number,
     required: true,
     min: 0,
+  },
+  totalDiscount: {
+    type: Number,
+    default: 0, // Total discount amount for statistics
   },
   status: {
     type: String,
@@ -58,6 +70,15 @@ const orderSchema = new mongoose.Schema({
 orderSchema.pre("save", function (next) {
   this.updatedAt = Date.now();
   next();
+});
+
+orderSchema.set("toJSON", {
+  transform: function (doc, ret) {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v;
+    return ret;
+  },
 });
 
 module.exports = mongoose.model("Order", orderSchema);
