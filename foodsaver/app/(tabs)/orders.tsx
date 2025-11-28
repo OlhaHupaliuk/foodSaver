@@ -1,9 +1,11 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useState, useEffect } from 'react';
 import { formatPrice, formatDateTime } from '../../utils/format';
+import { useAuth } from '../../hooks/useAuth';
+import { api } from '../../services/api';
 
 export default function OrdersScreen() {
-  const user = {email: '', name:'', user_type:'restaurant', phone: '' };
+  const { user } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
 
   useEffect(() => {
@@ -12,13 +14,34 @@ export default function OrdersScreen() {
     }
   }, [user]);
 
-  const loadOrders = async () => {
-  
-  };
+const loadOrders = async () => {
+  try {
+    const response = await api.orders.getAll();
+    if (response.status === 'success' && response.data) {
+      setOrders(response.data.orders || []);
+    }
+  } catch (error) {
+    console.error('Error loading orders:', error);
+  }
+};
 
-  const getStatusIcon = (status: string) => {
-  
-  };
+const getStatusIcon = (status: string) => {
+  switch (status) {
+    case 'pending':
+      return '⏳';
+    case 'confirmed':
+      return '✅';
+    case 'ready':
+      return '🍽️';
+    case 'completed':
+      return '🎉';
+    case 'cancelled':
+      return '❌';
+    default:
+      return '❓';
+  }
+};
+
 
   const getStatusText = (status: string) => {
     const statusMap: Record<string, string> = {

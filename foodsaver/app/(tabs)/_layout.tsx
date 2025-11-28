@@ -1,9 +1,10 @@
 import { Tabs, Redirect } from 'expo-router';
 import { Home, Search, ShoppingBag, Store, User } from 'lucide-react-native';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function TabLayout() {
-
-  const isRestaurant = true;
+  const { user } = useAuth();
+  const isRestaurant = user?.role === 'restaurant_owner';
 
   return (
     <Tabs

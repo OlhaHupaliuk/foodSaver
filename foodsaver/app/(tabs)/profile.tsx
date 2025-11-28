@@ -75,7 +75,6 @@ export default function ProfileScreen() {
         });
         setShowCreateRestaurant(false);
         Alert.alert('Успіх', 'Ресторан успішно створено');
-        // Перезавантажити дані користувача
         router.push('/(tabs)/profile');
       }
     } catch (error: any) {

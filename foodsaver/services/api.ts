@@ -7,63 +7,6 @@ interface FetchOptions extends RequestInit {
   skipAuth?: boolean;
 }
 
-const parseError = (error: any): AuthError => {
-  // Network error
-  if (error.message === 'Network request failed' || error instanceof TypeError) {
-    return {
-      type: AuthErrorType.NETWORK_ERROR,
-      message: 'Помилка мережі. Переконайтеся що сервер запущен та доступний.',
-      details: error.message,
-    };
-  }
-
-  // API error response
-  if (error.response) {
-    const status = error.response.status;
-    const data = error.response.data;
-
-    if (status === 401) {
-      return {
-        type: AuthErrorType.INVALID_CREDENTIALS,
-        message: data?.message || 'Невірний email або пароль',
-        statusCode: 401,
-      };
-    }
-
-    if (status === 400) {
-      return {
-        type: AuthErrorType.VALIDATION_ERROR,
-        message: data?.message || 'Помилка валідації даних',
-        details: data?.errors,
-        statusCode: 400,
-      };
-    }
-
-    if (status === 409) {
-      return {
-        type: AuthErrorType.USER_EXISTS,
-        message: 'Користувач з таким email уже існує',
-        statusCode: 409,
-      };
-    }
-
-    if (status === 500) {
-      return {
-        type: AuthErrorType.SERVER_ERROR,
-        message: 'Помилка сервера. Спробуйте пізніше.',
-        statusCode: 500,
-      };
-    }
-  }
-
-  // Unknown error
-  return {
-    type: AuthErrorType.UNKNOWN,
-    message: error.message || 'Невідома помилка. Спробуйте пізніше.',
-    details: error,
-  };
-};
-
 export const api = {
   async request<T>(endpoint: string, options: FetchOptions = {}): Promise<AuthResponse<T>> {
     const { skipAuth = false, ...fetchOptions } = options;
@@ -82,7 +25,7 @@ export const api = {
 
     try {
       const url = `${API_URL}${endpoint}`;
-      console.log('🔗 API Request:', url);
+      console.log('API Request:', url);
 
       const response = await fetch(url, {
         ...fetchOptions,
@@ -92,11 +35,11 @@ export const api = {
       const data = await response.json();
 
       if (!response.ok) {
-        console.error('❌ API Error:', response.status, data);
+        console.error('API Error:', response.status, data);
         throw new Error(data.message || `API Error: ${response.status}`);
       }
 
-      console.log('✅ API Success:', endpoint);
+      console.log('API Success:', endpoint);
       return data;
     } catch (error) {
       console.error('API Request Error:', error);

@@ -4,21 +4,30 @@ import { MapPin, Clock, Percent } from 'lucide-react-native';
 import { formatPrice } from '../../utils/format';
 import { getTimeUntilExpiry } from '../../utils/discount';
 import { router } from 'expo-router';
+import { useAuth } from '../../hooks/useAuth';
+import { api } from '../../services/api';
 
 export default function HomeScreen() {
   const [foodItems, setFoodItems] = useState<any[]>([]);
 
-  const profile = {email: '', name:'', user_type:'restaurant', phone: '' };
+  const { user } = useAuth();
 
   useEffect(() => {
     loadFoodItems();
   }, []);
 
-  const loadFoodItems = async () => {
-    
-  };
+const loadFoodItems = async () => {
+  try {
+    const response = await api.foodItems.getAll(); // або getNearby(user.location)
+    if (response.status === 'success' && response.data) {
+      setFoodItems(response.data.items || []);
+    }
+  } catch (error) {
+    console.error('Error loading food items:', error);
+  }
+};
 
-  const isRestaurant = profile?.user_type === 'restaurant';
+  const isRestaurant = user?.role === 'restaurant_owner';
 
   return (
     <View style={styles.container}>
