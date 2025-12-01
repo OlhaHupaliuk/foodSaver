@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
-import MapView, { Marker, Callout, Region } from 'react-native-maps';
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import MapView, { Region } from 'react-native-maps';
 import { useEffect, useMemo, useState } from 'react';
 import { formatPrice } from '../../utils/format';
 import { getTimeUntilExpiry } from '../../utils/discount';
@@ -7,6 +7,8 @@ import { api } from '../../services/api';
 import { FoodItem } from '../../types/auth';
 import { getDefaultCoordinates, getUserLocation } from '../../services/location';
 import { useOrderActions } from '../../hooks/useOrderActions';
+import FoodMarker from '../../components/maps/FoodMarker';
+import { X, Clock, MapPin, Phone, ShoppingCart } from 'lucide-react-native';
 
 const DEFAULT_REGION_DELTA = 0.05;
 
@@ -39,6 +41,8 @@ export default function ExploreScreen() {
   const [loadingLocation, setLoadingLocation] = useState(true);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
+  const [selectedItem, setSelectedItem] = useState<FoodItem | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
   const { orderingItemId, confirmAndPlaceOrder } = useOrderActions();
 
   useEffect(() => {
@@ -80,6 +84,23 @@ export default function ExploreScreen() {
     [foodItems]
   );
 
+  const handleMarkerPress = (item: FoodItem) => {
+    setSelectedItem(item);
+    setModalVisible(true);
+  };
+
+  const handleOrderFromModal = () => {
+    if (selectedItem) {
+      setModalVisible(false);
+      confirmAndPlaceOrder(selectedItem);
+    }
+  };
+
+  const calculateDiscount = (item: FoodItem) => {
+    if (!item.originalPrice || !item.discountedPrice) return 0;
+    return Math.round((1 - item.discountedPrice / item.originalPrice) * 100);
+  };
+
   return (
     <View style={styles.container}>
       {(loadingLocation || loadingItems) && (
@@ -100,23 +121,18 @@ export default function ExploreScreen() {
           const coordinate = coordinatesFromItem(item);
           if (!coordinate) return null;
 
+          const discount = calculateDiscount(item);
+
           return (
-            <Marker
+            <FoodMarker
               key={item.id}
               coordinate={coordinate}
-              pinColor="#10b981"
-              tracksViewChanges={false}
-            >
-              <Callout onPress={() => confirmAndPlaceOrder(item)}>
-                <View style={styles.callout}>
-                  <Text style={styles.calloutTitle}>{item.title}</Text>
-                  <Text style={styles.calloutSubtitle}>
-                    {formatPrice(item.discountedPrice)} · {getTimeUntilExpiry(item.expiryTime)}
-                  </Text>
-                  <Text style={styles.calloutAction}>Натисніть, щоб замовити</Text>
-                </View>
-              </Callout>
-            </Marker>
+              title={item.title}
+              price={item.discountedPrice}
+              originalPrice={item.originalPrice}
+              discount={discount}
+              onPress={() => handleMarkerPress(item)}
+            />
           );
         })}
       </MapView>
@@ -145,7 +161,7 @@ export default function ExploreScreen() {
                   styles.itemCard,
                   (!item.isAvailable || orderingItemId === item.id) && styles.disabledCard,
                 ]}
-                onPress={() => confirmAndPlaceOrder(item)}
+                onPress={() => handleMarkerPress(item)}
                 disabled={!item.isAvailable || orderingItemId === item.id}
               >
                 <Text style={styles.itemTitle}>{item.title}</Text>
@@ -157,6 +173,131 @@ export default function ExploreScreen() {
           </ScrollView>
         )}
       </View>
+
+      {/* Detailed Item Modal */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {selectedItem && (
+              <>
+                <View style={styles.modalHeader}>
+                  <View style={styles.modalHeaderContent}>
+                    <Text style={styles.modalTitle}>{selectedItem.title}</Text>
+                    {typeof selectedItem.restaurant !== 'string' && (
+                      <Text style={styles.modalRestaurant}>
+                        {selectedItem.restaurant?.name}
+                      </Text>
+                    )}
+                  </View>
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    <X size={24} color="#6b7280" />
+                  </TouchableOpacity>
+                </View>
+
+                <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+                  {selectedItem.description && (
+                    <View style={styles.modalSection}>
+                      <Text style={styles.modalDescription}>{selectedItem.description}</Text>
+                    </View>
+                  )}
+
+                  {selectedItem.category && (
+                    <View style={styles.modalSection}>
+                      <Text style={styles.modalCategory}>{selectedItem.category}</Text>
+                    </View>
+                  )}
+
+                  <View style={styles.modalSection}>
+                    <View style={styles.priceContainer}>
+                      <View>
+                        <Text style={styles.modalPrice}>{formatPrice(selectedItem.discountedPrice)}</Text>
+                        {selectedItem.originalPrice && selectedItem.originalPrice > selectedItem.discountedPrice && (
+                          <Text style={styles.modalOriginalPrice}>
+                            {formatPrice(selectedItem.originalPrice)}
+                          </Text>
+                        )}
+                      </View>
+                      {calculateDiscount(selectedItem) > 0 && (
+                        <View style={styles.modalDiscountBadge}>
+                          <Text style={styles.modalDiscountText}>
+                            -{calculateDiscount(selectedItem)}%
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+
+                  <View style={styles.modalInfoGrid}>
+                    <View style={styles.modalInfoItem}>
+                      <Clock size={18} color="#ef4444" />
+                      <View style={styles.modalInfoText}>
+                        <Text style={styles.modalInfoLabel}>До закінчення</Text>
+                        <Text style={styles.modalInfoValue}>
+                          {getTimeUntilExpiry(selectedItem.expiryTime)}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.modalInfoItem}>
+                      <ShoppingCart size={18} color="#10b981" />
+                      <View style={styles.modalInfoText}>
+                        <Text style={styles.modalInfoLabel}>В наявності</Text>
+                        <Text style={styles.modalInfoValue}>{selectedItem.quantity} шт.</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {typeof selectedItem.restaurant !== 'string' && selectedItem.restaurant && (
+                    <View style={styles.modalSection}>
+                      <View style={styles.restaurantInfo}>
+                        <MapPin size={18} color="#6b7280" />
+                        <Text style={styles.restaurantAddress}>
+                          {selectedItem.restaurant.address}
+                        </Text>
+                      </View>
+                      {selectedItem.restaurant.phone && (
+                        <View style={styles.restaurantInfo}>
+                          <Phone size={18} color="#6b7280" />
+                          <Text style={styles.restaurantPhone}>
+                            {selectedItem.restaurant.phone}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
+                </ScrollView>
+
+                <View style={styles.modalFooter}>
+                  <TouchableOpacity
+                    style={[
+                      styles.orderButton,
+                      (!selectedItem.isAvailable || orderingItemId === selectedItem.id) && styles.orderButtonDisabled
+                    ]}
+                    onPress={handleOrderFromModal}
+                    disabled={!selectedItem.isAvailable || orderingItemId === selectedItem.id}
+                  >
+                    {orderingItemId === selectedItem.id ? (
+                      <ActivityIndicator color="#ffffff" />
+                    ) : (
+                      <Text style={styles.orderButtonText}>
+                        {selectedItem.isAvailable ? 'Замовити' : 'Недоступно'}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -269,19 +410,147 @@ const styles = StyleSheet.create({
   disabledCard: {
     opacity: 0.6,
   },
-  callout: {
-    maxWidth: 200,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
   },
-  calloutTitle: {
+  modalContent: {
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '85%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  modalHeaderContent: {
+    flex: 1,
+    marginRight: 12,
+  },
+  modalTitle: {
+    fontSize: 24,
     fontWeight: '700',
+    color: '#111827',
     marginBottom: 4,
   },
-  calloutSubtitle: {
+  modalRestaurant: {
+    fontSize: 16,
     color: '#6b7280',
+    fontWeight: '500',
+  },
+  closeButton: {
+    padding: 4,
+  },
+  modalBody: {
+    padding: 20,
+  },
+  modalSection: {
+    marginBottom: 20,
+  },
+  modalDescription: {
+    fontSize: 16,
+    color: '#374151',
+    lineHeight: 24,
+  },
+  modalCategory: {
+    fontSize: 14,
+    color: '#6b7280',
+    fontStyle: 'italic',
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  modalPrice: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#10b981',
+  },
+  modalOriginalPrice: {
+    fontSize: 18,
+    color: '#9ca3af',
+    textDecorationLine: 'line-through',
+    marginTop: 4,
+  },
+  modalDiscountBadge: {
+    backgroundColor: '#ef4444',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  modalDiscountText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  modalInfoGrid: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 20,
+  },
+  modalInfoItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9fafb',
+    padding: 12,
+    borderRadius: 12,
+    gap: 12,
+  },
+  modalInfoText: {
+    flex: 1,
+  },
+  modalInfoLabel: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginBottom: 2,
+  },
+  modalInfoValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  restaurantInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     marginBottom: 8,
   },
-  calloutAction: {
-    color: '#10b981',
-    fontWeight: '600',
+  restaurantAddress: {
+    fontSize: 14,
+    color: '#6b7280',
+    flex: 1,
+  },
+  restaurantPhone: {
+    fontSize: 14,
+    color: '#6b7280',
+    flex: 1,
+  },
+  modalFooter: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+  },
+  orderButton: {
+    backgroundColor: '#10b981',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  orderButtonDisabled: {
+    backgroundColor: '#9ca3af',
+    opacity: 0.6,
+  },
+  orderButtonText: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: '700',
   },
 });
