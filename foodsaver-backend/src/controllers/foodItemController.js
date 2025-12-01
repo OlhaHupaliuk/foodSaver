@@ -3,8 +3,6 @@ const FoodItem = require("../models/FoodItem");
 const Restaurant = require("../models/Restaurant");
 const { validationResult } = require("express-validator");
 
-const DEFAULT_LOCATION = [24.0297, 49.8397];
-
 // @desc    Get all food items
 // @route   GET /api/food-items
 // @access  Public
@@ -150,15 +148,6 @@ exports.createFoodItem = async (req, res, next) => {
       });
     }
 
-    // Отримуємо ресторан для наслідування локації
-    const restaurant = await Restaurant.findById(req.user.restaurant);
-    if (!restaurant) {
-      return res.status(404).json({
-        status: "error",
-        message: "Restaurant not found",
-      });
-    }
-
     // Валідація цін
     if (req.body.discountedPrice >= req.body.originalPrice) {
       return res.status(400).json({
@@ -167,20 +156,6 @@ exports.createFoodItem = async (req, res, next) => {
       });
     }
 
-    // Підстраховка: якщо ресторан не має координат, ставимо дефолт (Львів)
-    let restaurantLocation = restaurant.location;
-    if (
-      !restaurantLocation ||
-      !Array.isArray(restaurantLocation.coordinates) ||
-      restaurantLocation.coordinates.length !== 2
-    ) {
-      restaurantLocation = {
-        type: "Point",
-        coordinates: DEFAULT_LOCATION,
-      };
-    }
-
-    // Створюємо food item з наслідуванням локації з ресторану
     const foodItem = await FoodItem.create({
       title: req.body.title,
       description: req.body.description,
@@ -191,8 +166,6 @@ exports.createFoodItem = async (req, res, next) => {
       expiryTime: req.body.expiryTime,
       restaurant: req.user.restaurant,
       isAvailable: true,
-      // Наслідуємо локацію з ресторану
-      location: restaurantLocation,
     });
 
     await foodItem.populate("restaurant", "name address phone");

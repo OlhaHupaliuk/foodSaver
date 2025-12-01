@@ -19,7 +19,7 @@ router.get("/:id", getOrder);
 router.post("/", orderValidation, createOrder);
 
 // оновити статус замовлення (тільки ресторан/адмін)
-router.put("/:id/status", authorize("restaurant", "admin"), updateOrderStatus);
+router.put("/:id/status", authorize("restaurant_owner", "admin"), updateOrderStatus);
 
 // Скасувати замовлення (тільки користувач)
 router.delete("/:id", cancelOrder);
