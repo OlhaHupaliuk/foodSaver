@@ -31,9 +31,26 @@ export default function OrdersScreen() {
         const now = new Date();
         let filtered = list;
 
-        // For restaurant owners, hide orders where all related food items are already expired
         if (user?.role === 'restaurant_owner') {
+          const ownerRestaurantId =
+            typeof user.restaurant !== 'string' ? user.restaurant?.id : undefined;
+
           filtered = list.filter((order) => {
+            const orderRestaurantId =
+              order.restaurant && typeof order.restaurant !== 'string'
+                ? order.restaurant.id
+                : undefined;
+
+            if (!ownerRestaurantId || !orderRestaurantId || ownerRestaurantId !== orderRestaurantId) {
+              return false;
+            }
+
+            const orderUserId =
+              order.user && typeof order.user !== 'string' ? (order.user as any).id : undefined;
+            if (orderUserId && user.id && orderUserId === user.id) {
+              return false;
+            }
+
             if (!order.items || order.items.length === 0) return false;
 
             return order.items.some((orderItem) => {

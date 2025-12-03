@@ -1,7 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, Image } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Plus, X, Clock, DollarSign, Trash2, Image as ImageIcon } from 'lucide-react-native';
-// @ts-ignore - expo-image-picker types will be available after dependencies are installed
 import * as ImagePicker from 'expo-image-picker';
 import { formatPrice } from '../../utils/format';
 import { getTimeUntilExpiry } from '../../utils/discount';
@@ -228,7 +227,7 @@ export default function ManageScreen() {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: (ImagePicker as any).MediaType.IMAGE,
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
