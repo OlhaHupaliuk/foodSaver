@@ -6,17 +6,49 @@ import { RestaurantStatisticsResponse } from '../../types/auth';
 import { formatPrice } from '../../utils/format';
 import { router } from 'expo-router';
 
+// Mock data for demonstration
+const MOCK_STATS: RestaurantStatisticsResponse = {
+  summary: {
+    totalFoodSaved: 342,
+    totalMoneySaved: 45680,
+    totalRevenue: 123450,
+    totalOrders: 156,
+    averageRating: 4.7,
+  },
+  charts: {
+    weekly: [
+      { label: 'Тиждень 1', orders: 12, revenue: 8500, moneySaved: 3200 },
+      { label: 'Тиждень 2', orders: 18, revenue: 12400, moneySaved: 4800 },
+      { label: 'Тиждень 3', orders: 15, revenue: 10200, moneySaved: 3900 },
+      { label: 'Тиждень 4', orders: 22, revenue: 15600, moneySaved: 5800 },
+      { label: 'Тиждень 5', orders: 20, revenue: 14200, moneySaved: 5200 },
+      { label: 'Тиждень 6', orders: 25, revenue: 17800, moneySaved: 6500 },
+      { label: 'Тиждень 7', orders: 19, revenue: 13500, moneySaved: 5000 },
+      { label: 'Тиждень 8', orders: 27, revenue: 19200, moneySaved: 7200 },
+    ],
+    monthly: [
+      { label: 'Січень', orders: 45, revenue: 32000, moneySaved: 12000 },
+      { label: 'Лютий', orders: 52, revenue: 36800, moneySaved: 13800 },
+      { label: 'Березень', orders: 48, revenue: 34200, moneySaved: 12800 },
+      { label: 'Квітень', orders: 61, revenue: 43200, moneySaved: 16200 },
+      { label: 'Травень', orders: 58, revenue: 41100, moneySaved: 15400 },
+      { label: 'Червень', orders: 67, revenue: 47500, moneySaved: 17800 },
+    ],
+  },
+};
+
 export default function StatsScreen() {
   const { user } = useAuth();
   const [stats, setStats] = useState<RestaurantStatisticsResponse | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [statsError, setStatsError] = useState<string | null>(null);
   const [period, setPeriod] = useState<'week' | 'month' | 'year' | 'all'>('month');
+  const [useMockData, setUseMockData] = useState(true); // Toggle to use mock data
 
   useEffect(() => {
     if (!user || user.role !== 'restaurant_owner') return;
     loadRestaurantStats();
-  }, [user, period]);
+  }, [user, period, useMockData]);
 
   const loadRestaurantStats = async () => {
     try {
@@ -27,6 +59,13 @@ export default function StatsScreen() {
 
       setStatsLoading(true);
       setStatsError(null);
+
+      if (useMockData) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        setStats(MOCK_STATS);
+        setStatsLoading(false);
+        return;
+      }
 
       const response = await api.statistics.getRestaurantStats(user.restaurant.id, period);
 
@@ -43,10 +82,12 @@ export default function StatsScreen() {
     }
   };
 
-  const currentWeeklyChart = useMemo(
-    () => stats?.charts.weekly ?? [],
-    [stats]
-  );
+  const currentChart = useMemo(() => {
+    if (!stats) return [];
+    if (period === 'week') return stats.charts.weekly;
+    if (period === 'month' || period === 'year' || period === 'all') return stats.charts.monthly;
+    return [];
+  }, [stats, period]);
 
   if (!user || user.role !== 'restaurant_owner') {
     return (
@@ -162,12 +203,14 @@ export default function StatsScreen() {
                   </View>
                 </View>
 
-                {currentWeeklyChart.length > 0 && (
+                {currentChart.length > 0 && (
                   <View style={styles.chartCard}>
-                    <Text style={styles.chartTitle}>Динаміка за останні тижні</Text>
-                    {currentWeeklyChart.map((point) => {
+                    <Text style={styles.chartTitle}>
+                      Динаміка виручки ({period === 'week' ? 'по тижнях' : 'по місяцях'})
+                    </Text>
+                    {currentChart.map((point) => {
                       const maxRevenue = Math.max(
-                        ...currentWeeklyChart.map((p) => p.revenue || 0),
+                        ...currentChart.map((p) => p.revenue || 0),
                         1
                       );
                       const widthPercent = Math.max(
@@ -196,6 +239,155 @@ export default function StatsScreen() {
                     })}
                   </View>
                 )}
+
+                {/* Money Saved Chart - Line-like visualization */}
+                {currentChart.length > 0 && (
+                  <View style={styles.chartCard}>
+                    <Text style={styles.chartTitle}>
+                      Економія грошей ({period === 'week' ? 'по тижнях' : 'по місяцях'})
+                    </Text>
+                    {currentChart.map((point) => {
+                      const maxSaved = Math.max(
+                        ...currentChart.map((p) => p.moneySaved || 0),
+                        1
+                      );
+                      const widthPercent = Math.max(
+                        8,
+                        Math.round((point.moneySaved / maxSaved) * 100)
+                      );
+
+                      return (
+                        <View key={`saved-${point.label}`} style={styles.chartRow}>
+                          <View style={styles.chartRowHeader}>
+                            <Text style={styles.chartLabel}>{point.label}</Text>
+                            <Text style={styles.chartValue}>
+                              {formatPrice(point.moneySaved)}
+                            </Text>
+                          </View>
+                          <View style={styles.chartBarBackground}>
+                            <View
+                              style={[
+                                styles.chartBarFillMoneySaved,
+                                { width: `${widthPercent}%` },
+                              ]}
+                            />
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </View>
+                )}
+
+                {/* Orders Chart - Column visualization */}
+                {currentChart.length > 0 && (
+                  <View style={styles.chartCard}>
+                    <Text style={styles.chartTitle}>
+                      Кількість замовлень ({period === 'week' ? 'по тижнях' : 'по місяцях'})
+                    </Text>
+                    <View style={styles.ordersChartContainer}>
+                      {currentChart.map((point) => {
+                        const maxOrders = Math.max(
+                          ...currentChart.map((p) => p.orders || 0),
+                          1
+                        );
+                        const heightPercent = Math.max(
+                          10,
+                          Math.round((point.orders / maxOrders) * 100)
+                        );
+
+                        return (
+                          <View key={`orders-${point.label}`} style={styles.ordersChartItem}>
+                            <View style={styles.ordersChartBarContainer}>
+                              <View
+                                style={[
+                                  styles.ordersChartBar,
+                                  { height: `${heightPercent}%` },
+                                ]}
+                              />
+                            </View>
+                            <Text style={styles.ordersChartLabel}>{point.label}</Text>
+                            <Text style={styles.ordersChartValue}>{point.orders}</Text>
+                          </View>
+                        );
+                      })}
+                    </View>
+                  </View>
+                )}
+
+                {/* Comparison Chart - Revenue vs Money Saved */}
+                {currentChart.length > 0 && (
+                  <View style={styles.chartCard}>
+                    <Text style={styles.chartTitle}>
+                      Порівняння: Виручка vs Економія
+                    </Text>
+                    {currentChart.map((point) => {
+                      const maxValue = Math.max(
+                        ...currentChart.map((p) => Math.max(p.revenue || 0, p.moneySaved || 0)),
+                        1
+                      );
+                      const revenuePercent = Math.max(
+                        5,
+                        Math.round((point.revenue / maxValue) * 100)
+                      );
+                      const savedPercent = Math.max(
+                        5,
+                        Math.round((point.moneySaved / maxValue) * 100)
+                      );
+
+                      return (
+                        <View key={`comparison-${point.label}`} style={styles.comparisonRow}>
+                          <Text style={styles.comparisonLabel}>{point.label}</Text>
+                          <View style={styles.comparisonBars}>
+                            <View style={styles.comparisonBarContainer}>
+                              <View style={styles.comparisonBarLabel}>
+                                <Text style={styles.comparisonBarLabelText}>Виручка</Text>
+                                <Text style={styles.comparisonBarValue}>
+                                  {formatPrice(point.revenue)}
+                                </Text>
+                              </View>
+                              <View style={styles.chartBarBackground}>
+                                <View
+                                  style={[
+                                    styles.chartBarFill,
+                                    { width: `${revenuePercent}%` },
+                                  ]}
+                                />
+                              </View>
+                            </View>
+                            <View style={styles.comparisonBarContainer}>
+                              <View style={styles.comparisonBarLabel}>
+                                <Text style={styles.comparisonBarLabelText}>Економія</Text>
+                                <Text style={styles.comparisonBarValue}>
+                                  {formatPrice(point.moneySaved)}
+                                </Text>
+                              </View>
+                              <View style={styles.chartBarBackground}>
+                                <View
+                                  style={[
+                                    styles.chartBarFillMoneySaved,
+                                    { width: `${savedPercent}%` },
+                                  ]}
+                                />
+                              </View>
+                            </View>
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </View>
+                )}
+
+                {/* Mock Data Toggle */}
+                <View style={styles.mockDataToggle}>
+                  <TouchableOpacity
+                    style={[styles.mockToggleButton, useMockData && styles.mockToggleButtonActive]}
+                    onPress={() => setUseMockData(!useMockData)}
+                  >
+                    <Text style={[styles.mockToggleText, useMockData && styles.mockToggleTextActive]}>
+                      {useMockData ? '✓ Використовуються тестові дані' : 'Використовувати тестові дані'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </>
             )}
           </View>
@@ -236,8 +428,9 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   statsHeaderRow: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'space-between',
+    gap: 12,
     alignItems: 'center',
     marginBottom: 12,
   },
@@ -360,6 +553,102 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 999,
     backgroundColor: '#10b981',
+  },
+  chartBarFillMoneySaved: {
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: '#3b82f6',
+  },
+  ordersChartContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'flex-end',
+    marginTop: 8,
+    paddingVertical: 12,
+    minHeight: 120,
+  },
+  ordersChartItem: {
+    flex: 1,
+    alignItems: 'center',
+    marginHorizontal: 2,
+  },
+  ordersChartBarContainer: {
+    width: '100%',
+    height: 80,
+    justifyContent: 'flex-end',
+    marginBottom: 4,
+  },
+  ordersChartBar: {
+    width: '100%',
+    backgroundColor: '#8b5cf6',
+    borderRadius: 4,
+    minHeight: 8,
+  },
+  ordersChartLabel: {
+    fontSize: 10,
+    color: '#6b7280',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  ordersChartValue: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#111827',
+    marginTop: 2,
+  },
+  comparisonRow: {
+    marginBottom: 16,
+  },
+  comparisonLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 8,
+  },
+  comparisonBars: {
+    gap: 8,
+  },
+  comparisonBarContainer: {
+    marginBottom: 4,
+  },
+  comparisonBarLabel: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  comparisonBarLabelText: {
+    fontSize: 11,
+    color: '#6b7280',
+  },
+  comparisonBarValue: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  mockDataToggle: {
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  mockToggleButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#f3f4f6',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    alignItems: 'center',
+  },
+  mockToggleButtonActive: {
+    backgroundColor: '#ecfdf5',
+    borderColor: '#10b981',
+  },
+  mockToggleText: {
+    fontSize: 13,
+    color: '#6b7280',
+  },
+  mockToggleTextActive: {
+    color: '#047857',
+    fontWeight: '600',
   },
   infoCard: {
     backgroundColor: '#ecfeff',
