@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { Leaf } from 'lucide-react-native';
 
@@ -13,11 +13,6 @@ export default function WelcomeScreen() {
           <Text style={styles.appName}>FoodSaver</Text>
           <Text style={styles.tagline}>Рятуйте їжу. Економте гроші.</Text>
         </View>
-
-        <Image
-          source={{ uri: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg' }}
-          style={styles.heroImage}
-        />
 
         <View style={styles.features}>
           <Text style={styles.featureText}>До 70% знижки на якісну їжу</Text>
@@ -53,21 +48,26 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 80,
+    paddingTop: 120,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 32,
+    gap: 8,
   },
   logo: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: '#d1fae5',
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    shadowColor: '#10b981',
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
   },
   appName: {
     fontSize: 36,
@@ -79,15 +79,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6b7280',
   },
-  heroImage: {
-    width: '100%',
-    height: 240,
-    borderRadius: 16,
-    marginBottom: 32,
-  },
   features: {
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
+    paddingHorizontal: 16,
   },
   featureText: {
     fontSize: 16,

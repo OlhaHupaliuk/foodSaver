@@ -138,7 +138,8 @@ export default function SignUpScreen() {
               mode="outlined"
               left={<TextInput.Icon icon="account-outline" />}
               value={fullName}
-              activeOutlineColor="#6b6b6bff" 
+              outlineColor="#e5e7eb"
+              activeOutlineColor="#333"
               onChangeText={(t) => {
                 setFullName(t);
                 setLocalError('');
@@ -150,7 +151,8 @@ export default function SignUpScreen() {
               label="Email *"
               mode="outlined"
               left={<TextInput.Icon icon="email-outline" />}
-              activeOutlineColor="#6b6b6bff" 
+              outlineColor="#e5e7eb"
+              activeOutlineColor="#333"
               value={email}
               onChangeText={(t) => {
                 setEmail(t);
@@ -163,7 +165,8 @@ export default function SignUpScreen() {
             <TextInput
               label="Телефон (необов'язково)"
               mode="outlined" 
-              activeOutlineColor="#6b6b6bff" 
+              outlineColor="#e5e7eb"
+              activeOutlineColor="#333"
               left={<TextInput.Icon icon="phone-outline" />}
               value={phone}
               onChangeText={(t) => {
@@ -179,7 +182,8 @@ export default function SignUpScreen() {
               left={<TextInput.Icon icon="lock-outline" />}
               secureTextEntry
               value={password}    
-              activeOutlineColor="#6b6b6bff" 
+              outlineColor="#e5e7eb"
+              activeOutlineColor="#333"
               onChangeText={(t) => {
                 setPassword(t);
                 setLocalError('');
