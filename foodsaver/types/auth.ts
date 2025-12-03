@@ -23,6 +23,7 @@ export interface AuthUser {
   name: string;
   email: string;
   phone?: string;
+  photo?: string; // Base64 encoded photo
   role: 'user' | 'restaurant_owner' | 'admin';
   restaurant?: Restaurant | null;
   createdAt?: string;

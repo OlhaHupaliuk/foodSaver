@@ -17,35 +17,18 @@ const reviewValidation = [
 ];
 
 // GET reviews for restaurant
-router.get(
-  "/restaurant/:restaurantId",
-  reviewController.getRestaurantReviews
-);
+router.get("/restaurant/:restaurantId", reviewController.getRestaurantReviews);
 
 // GET reviews for food item
-router.get(
-  "/food-item/:foodItemId",
-  reviewController.getFoodItemReviews
-);
+router.get("/food-item/:foodItemId", reviewController.getFoodItemReviews);
 
 // POST create review
-router.post(
-  "/",
-  protect,
-  reviewValidation,
-  reviewController.createReview
-);
+router.post("/", protect, reviewValidation, reviewController.createReview);
 
 // PUT update review
-router.put(
-  "/:id",
-  protect,
-  reviewValidation,
-  reviewController.updateReview
-);
+router.put("/:id", protect, reviewValidation, reviewController.updateReview);
 
 // DELETE review
 router.delete("/:id", protect, reviewController.deleteReview);
 
 module.exports = router;
-

@@ -10,8 +10,11 @@ const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+console.log(
+  "Body parser configured with 50MB limit for JSON and URL-encoded data"
+);
 
 // Тестовий route
 app.get("/", (req, res) => {
@@ -28,8 +31,19 @@ app.use("/api/orders", require("./routes/orders"));
 app.use("/api/reviews", require("./routes/reviews"));
 app.use("/api/statistics", require("./routes/statistics"));
 
+// Error handler middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
+
+  // Handle payload too large error specifically
+  if (err.type === "entity.too.large" || err.message?.includes("too large")) {
+    return res.status(413).json({
+      status: "error",
+      message:
+        "Файл занадто великий. Будь ласка, виберіть менше фото або зменшіть його розмір.",
+    });
+  }
+
   res.status(err.status || 500).json({
     message: err.message || "Something went wrong!",
     status: "error",

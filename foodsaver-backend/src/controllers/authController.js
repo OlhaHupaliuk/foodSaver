@@ -54,6 +54,7 @@ exports.register = async (req, res, next) => {
           name: user.name,
           email: user.email,
           phone: user.phone,
+          photo: user.photo,
           role: user.role,
           restaurant: user.restaurant,
         },
@@ -120,6 +121,7 @@ exports.login = async (req, res, next) => {
           name: user.name,
           email: user.email,
           phone: user.phone,
+          photo: user.photo,
           role: user.role,
           restaurant: user.restaurant,
         },
@@ -152,22 +154,61 @@ exports.getMe = async (req, res, next) => {
 // @access  Private
 exports.updateProfile = async (req, res, next) => {
   try {
-    const fieldsToUpdate = {
-      name: req.body.name,
-      email: req.body.email,
-      phone: req.body.phone,
-    };
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        status: "error",
+        message: "Помилка валідації",
+        errors: errors.array(),
+      });
+    }
+
+    const fieldsToUpdate = {};
+
+    if (req.body.name !== undefined) fieldsToUpdate.name = req.body.name;
+    if (req.body.email !== undefined) fieldsToUpdate.email = req.body.email;
+    if (req.body.phone !== undefined) {
+      fieldsToUpdate.phone = req.body.phone || null;
+    }
+
+    // Handle photo update - allow empty string to remove, or set new photo
+    if (req.body.photo !== undefined) {
+      if (req.body.photo === "" || req.body.photo === null) {
+        fieldsToUpdate.photo = null;
+      } else if (
+        typeof req.body.photo === "string" &&
+        req.body.photo.length > 0
+      ) {
+        fieldsToUpdate.photo = req.body.photo;
+      }
+    }
+
+    console.log("Updating profile with fields:", Object.keys(fieldsToUpdate));
+    if (fieldsToUpdate.photo !== undefined) {
+      console.log(
+        "Photo field will be updated, length:",
+        fieldsToUpdate.photo ? fieldsToUpdate.photo.length : 0
+      );
+    }
 
     const user = await User.findByIdAndUpdate(req.user._id, fieldsToUpdate, {
       new: true,
       runValidators: true,
     }).populate("restaurant");
 
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "Користувача не знайдено",
+      });
+    }
+
     res.json({
       status: "success",
       data: { user },
     });
   } catch (error) {
+    console.error("Error updating profile:", error);
     next(error);
   }
 };

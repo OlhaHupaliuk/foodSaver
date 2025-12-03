@@ -52,6 +52,19 @@ router.put(
     body("name").optional().trim().isLength({ min: 2 }),
     body("email").optional().isEmail().normalizeEmail(),
     body("phone").optional().trim(),
+    body("photo")
+      .optional()
+      .custom((value) => {
+        if (
+          value === null ||
+          value === undefined ||
+          value === "" ||
+          typeof value === "string"
+        ) {
+          return true;
+        }
+        throw new Error("Photo must be a string");
+      }),
   ],
   authController.updateProfile
 );

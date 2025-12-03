@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema(
       minlength: 6,
     },
     phone: String,
+    photo: String,
     role: {
       type: String,
       enum: ["user", "restaurant_owner", "admin"],
