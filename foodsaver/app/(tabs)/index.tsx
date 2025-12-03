@@ -35,10 +35,12 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>FoodSaver</Text>
-        <Text style={styles.subtitle}>
-          {isRestaurant ? 'Керуйте залишками їжі' : 'Рятуйте їжу, економте гроші'}
-        </Text>
+        <View>
+          <Text style={styles.title}>FoodSaver</Text>
+          <Text style={styles.subtitle}>
+            {isRestaurant ? 'Керуйте залишками їжі' : 'Рятуйте їжу, економте гроші'}
+          </Text>
+        </View>
       </View>
 
       <ScrollView style={styles.content}>
@@ -55,45 +57,66 @@ export default function HomeScreen() {
           </View>
         ) : (
           <View style={styles.foodList}>
-            <Text style={styles.sectionTitle}>Найближчі </Text>
-            {foodItems.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                style={[styles.foodCard, (!item.isAvailable || orderingItemId === item.id) && styles.disabledCard]}
-                onPress={() => confirmAndPlaceOrder(item)}
-                disabled={!item.isAvailable || orderingItemId === item.id}
-              >
-                <Image
-                  source={{ uri: item.imageUrl || 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg' }}
-                  style={styles.foodImage}
-                />
-                <View style={styles.foodInfo}>
-                  <Text style={styles.foodTitle}>{item.title}</Text>
-                  <View style={styles.restaurantInfo}>
-                    <MapPin size={14} color="#6b7280" />
-                    <Text style={styles.restaurantName}>
-                      {typeof item.restaurant !== 'string' ? item.restaurant?.name : ''}
-                    </Text>
-                  </View>
-                  <View style={styles.priceRow}>
-                    <View style={styles.priceContainer}>
-                      <Text style={styles.originalPrice}>{formatPrice(item.originalPrice)}</Text>
-                      <Text style={styles.discountPrice}>{formatPrice(item.discountedPrice)}</Text>
+            <View style={styles.listHeaderRow}>
+              <Text style={styles.sectionTitle}>Найближчі</Text>
+            </View>
+
+            {foodItems.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyTitle}>Поки що немає доступних позицій поруч</Text>
+                <Text style={styles.emptySubtitle}>
+                  Поверніться трохи пізніше або перегляньте карту, щоб знайти заклади в інших районах.
+                </Text>
+              </View>
+            ) : (
+              foodItems.map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={[
+                    styles.foodCard,
+                    (!item.isAvailable || orderingItemId === item.id) && styles.disabledCard,
+                  ]}
+                  onPress={() => confirmAndPlaceOrder(item)}
+                  disabled={!item.isAvailable || orderingItemId === item.id}
+                >
+                  <Image
+                    source={{
+                      uri:
+                        item.imageUrl ||
+                        'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg',
+                    }}
+                    style={styles.foodImage}
+                  />
+                  <View style={styles.foodInfo}>
+                    <Text style={styles.foodTitle}>{item.title}</Text>
+                    <View style={styles.restaurantInfo}>
+                      <MapPin size={14} color="#6b7280" />
+                      <Text style={styles.restaurantName}>
+                        {typeof item.restaurant !== 'string' ? item.restaurant?.name : ''}
+                      </Text>
                     </View>
-                    <View style={styles.timeContainer}>
-                      <Clock size={14} color="#ef4444" />
-                      <Text style={styles.timeText}>{getTimeUntilExpiry(item.expiryTime)}</Text>
+                    <View style={styles.priceRow}>
+                      <View style={styles.priceContainer}>
+                        <Text style={styles.originalPrice}>{formatPrice(item.originalPrice)}</Text>
+                        <Text style={styles.discountPrice}>{formatPrice(item.discountedPrice)}</Text>
+                      </View>
+                      <View style={styles.timeContainer}>
+                        <Clock size={14} color="#ef4444" />
+                        <Text style={styles.timeText}>{getTimeUntilExpiry(item.expiryTime)}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.discountBadge}>
+                      <Percent size={12} color="#ffffff" />
+                      <Text style={styles.discountText}>
+                        {Math.round(
+                          (1 - (item.discountedPrice ?? 0) / (item.originalPrice || 1)) * 100
+                        )}
+                      </Text>
                     </View>
                   </View>
-                  <View style={styles.discountBadge}>
-                    <Percent size={12} color="#ffffff" />
-                    <Text style={styles.discountText}>
-                      {Math.round((1 - (item.discountedPrice ?? 0) / (item.originalPrice || 1)) * 100)}%
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))}
+                </TouchableOpacity>
+              ))
+            )}
           </View>
         )}
       </ScrollView>
@@ -104,43 +127,48 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#f5f5f5',
   },
   header: {
-    backgroundColor: '#10b981',
-    paddingTop: 60,
-    paddingBottom: 24,
+    paddingTop: 52,
+    paddingBottom: 16,
     paddingHorizontal: 20,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#e5e7eb',
+    backgroundColor: '#ffffff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: '#111827',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: '#d1fae5',
+    color: '#6b7280',
   },
   content: {
     flex: 1,
   },
   restaurantDashboard: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 24,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: '#111827',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   actionCard: {
     backgroundColor: '#ffffff',
     borderRadius: 12,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: '#10b981',
-    borderStyle: 'dashed',
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
   },
   actionTitle: {
     fontSize: 18,
@@ -153,18 +181,22 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   foodList: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+  },
+  listHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   foodCard: {
     backgroundColor: '#ffffff',
     borderRadius: 12,
     marginBottom: 16,
     overflow: 'hidden',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
   },
   foodImage: {
     width: '100%',
@@ -213,10 +245,9 @@ const styles = StyleSheet.create({
   timeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fef2f2',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
   timeText: {
     fontSize: 12,
@@ -228,7 +259,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 16,
     right: 16,
-    backgroundColor: '#ef4444',
+    backgroundColor: '#f97316',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 8,
@@ -243,5 +274,20 @@ const styles = StyleSheet.create({
   },
   disabledCard: {
     opacity: 0.6,
+  },
+  emptyState: {
+    paddingVertical: 32,
+    paddingHorizontal: 8,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 6,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#6b7280',
+    lineHeight: 20,
   },
 });

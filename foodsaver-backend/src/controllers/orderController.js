@@ -22,7 +22,7 @@ exports.getOrders = async (req, res, next) => {
     const orders = await Order.find(query)
       .populate("user", "name email phone")
       .populate("restaurant", "name address phone")
-      .populate("items.foodItem", "name originalPrice discountedPrice")
+      .populate("items.foodItem", "title originalPrice discountedPrice")
       .sort({ createdAt: -1 });
 
     res.json({
@@ -45,7 +45,7 @@ exports.getOrder = async (req, res, next) => {
       .populate("restaurant", "name address phone")
       .populate(
         "items.foodItem",
-        "name description originalPrice discountedPrice"
+        "title description originalPrice discountedPrice"
       );
 
     if (!order) {
@@ -107,7 +107,7 @@ exports.createOrder = async (req, res, next) => {
       if (!foodItem.isAvailable || foodItem.quantity < item.quantity) {
         return res.status(400).json({
           status: "error",
-          message: `${foodItem.name} is not available in requested quantity`,
+          message: `${foodItem.title} is not available in requested quantity`,
         });
       }
 
@@ -115,7 +115,7 @@ exports.createOrder = async (req, res, next) => {
       if (new Date() > foodItem.expiryTime) {
         return res.status(400).json({
           status: "error",
-          message: `${foodItem.name} has expired`,
+          message: `${foodItem.title} has expired`,
         });
       }
 
@@ -159,7 +159,7 @@ exports.createOrder = async (req, res, next) => {
     await order.populate([
       { path: "user", select: "name email phone" },
       { path: "restaurant", select: "name address phone" },
-      { path: "items.foodItem", select: "name description" },
+      { path: "items.foodItem", select: "title description" },
     ]);
 
     res.status(201).json({

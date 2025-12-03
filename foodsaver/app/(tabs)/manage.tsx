@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, KeyboardAvoidingView, Platform, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, Image } from 'react-native';
 import { useState, useEffect } from 'react';
-import { Plus, X, Clock, DollarSign, Trash2 } from 'lucide-react-native';
+import { Plus, X, Clock, DollarSign, Trash2, Image as ImageIcon } from 'lucide-react-native';
 import { formatPrice } from '../../utils/format';
 import { getTimeUntilExpiry } from '../../utils/discount';
 import { useAuth } from '../../hooks/useAuth';
@@ -21,6 +21,7 @@ export default function ManageScreen() {
     discount_price: '',
     quantity: '1',
     expiry_hours: '6',
+    imageUrl: '',
   });
 
   useEffect(() => {
@@ -164,6 +165,7 @@ export default function ManageScreen() {
         discountedPrice: parseFloat(newItem.discount_price),
         quantity: parseInt(newItem.quantity),
         expiryTime: expiryTime.toISOString(),
+        imageUrl: newItem.imageUrl || undefined,
       };
 
       const response = await api.foodItems.create(itemData);
@@ -179,6 +181,7 @@ export default function ManageScreen() {
           discount_price: '',
           quantity: '1',
           expiry_hours: '6',
+          imageUrl: '',
         });
         
         setShowAddModal(false);
@@ -201,6 +204,10 @@ export default function ManageScreen() {
       }
     }
     return 0;
+  };
+
+  const removeImage = () => {
+    setNewItem({ ...newItem, imageUrl: '' });
   };
 
   if (!restaurant) {
@@ -379,6 +386,36 @@ export default function ManageScreen() {
                 onChangeText={(text) => setNewItem({ ...newItem, category: text })}
                 editable={!saving}
               />
+
+              {/* Image URL Input */}
+              <View style={styles.imageSection}>
+                <Text style={styles.imageLabel}>URL зображення (необов'язково)</Text>
+                {newItem.imageUrl ? (
+                  <View style={styles.imagePreviewContainer}>
+                    <Image source={{ uri: newItem.imageUrl }} style={styles.imagePreview} />
+                    <TouchableOpacity
+                      style={styles.removeImageButton}
+                      onPress={removeImage}
+                      disabled={saving}
+                    >
+                      <X size={16} color="#ffffff" />
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder="https://example.com/image.jpg"
+                  placeholderTextColor="#9ca3af"
+                  value={newItem.imageUrl}
+                  onChangeText={(text) => setNewItem({ ...newItem, imageUrl: text })}
+                  autoCapitalize="none"
+                  keyboardType="url"
+                  editable={!saving}
+                />
+                <Text style={styles.imageHint}>
+                  Введіть URL зображення або залиште порожнім
+                </Text>
+              </View>
 
               <TextInput
                 style={styles.modalInput}
@@ -753,5 +790,43 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#6b7280',
+  },
+  imageSection: {
+    marginBottom: 16,
+  },
+  imageLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 8,
+  },
+  imageHint: {
+    fontSize: 12,
+    color: '#9ca3af',
+    marginTop: 4,
+    fontStyle: 'italic',
+  },
+  imagePreviewContainer: {
+    position: 'relative',
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  imagePreview: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'cover',
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#ef4444',
+    borderRadius: 20,
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

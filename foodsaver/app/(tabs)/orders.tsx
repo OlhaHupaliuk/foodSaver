@@ -25,7 +25,8 @@ export default function OrdersScreen() {
       setLoading(true);
       const response = await api.orders.getAll();
       if (response.status === 'success' && response.data) {
-        setOrders(response.data.orders || []);
+        const data = response.data as { orders?: Order[] };
+        setOrders(data.orders || []);
       }
     } catch (error) {
       console.error('Error loading orders:', error);
@@ -105,9 +106,14 @@ export default function OrdersScreen() {
       return '—';
     }
     const firstItem = order.items[0];
+    if (!firstItem || !firstItem.foodItem) {
+      return 'Позиція';
+    }
     const remaining = order.items.length - 1;
     const firstTitle =
-      typeof firstItem.foodItem !== 'string' ? firstItem.foodItem.title : 'Позиція';
+      typeof firstItem.foodItem !== 'string' && firstItem.foodItem?.title
+        ? firstItem.foodItem.title
+        : 'Позиція';
     return remaining > 0 ? `${firstTitle} +${remaining}` : firstTitle;
   };
 
@@ -134,11 +140,19 @@ export default function OrdersScreen() {
                 <View style={styles.orderHeader}>
                   <View style={{ flex: 1 }}>
                     {isRestaurantOwner ? (
-                      <Text style={styles.customerName}>
-                        {order.user && typeof order.user !== 'string' 
-                          ? order.user.name || order.user.email 
-                          : 'Користувач'}
-                      </Text>
+                      <>
+                        <Text style={styles.customerName}>
+                          {order.user && typeof order.user !== 'string' 
+                            ? (order.user as any).name || (order.user as any).email 
+                            : 'Користувач'}
+                        </Text>
+                        {order.user && typeof order.user !== 'string' && (order.user as any).phone && (
+                          <Text style={styles.customerPhone}>{(order.user as any).phone}</Text>
+                        )}
+                        {order.user && typeof order.user !== 'string' && (order.user as any).email && (
+                          <Text style={styles.customerEmail}>{(order.user as any).email}</Text>
+                        )}
+                      </>
                     ) : (
                       <Text style={styles.restaurantName}>
                         {order.restaurant && typeof order.restaurant !== 'string' 
@@ -288,6 +302,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#111827',
     flex: 1,
+    marginBottom: 4,
+  },
+  customerPhone: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginTop: 2,
+  },
+  customerEmail: {
+    fontSize: 12,
+    color: '#9ca3af',
+    marginTop: 2,
   },
   orderHeader: {
     flexDirection: 'row',

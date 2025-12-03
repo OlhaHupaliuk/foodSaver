@@ -164,6 +164,7 @@ exports.createFoodItem = async (req, res, next) => {
       discountedPrice: req.body.discountedPrice,
       quantity: req.body.quantity,
       expiryTime: req.body.expiryTime,
+      imageUrl: req.body.imageUrl || null,
       restaurant: req.user.restaurant,
       isAvailable: true,
     });
