@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AuthResponse, AuthLoginResponse, GetMeResponse, AuthUser, AuthError, AuthErrorType, FoodItem } from '../types/auth';
+import { AuthResponse, AuthLoginResponse, GetMeResponse, AuthUser, AuthError, AuthErrorType, FoodItem, RestaurantStatisticsResponse } from '../types/auth';
 
-const API_URL = 'http://10.10.10.73:5000/api';
+const API_URL = 'http://172.20.10.12:5000/api';
 
 interface FetchOptions extends RequestInit {
   skipAuth?: boolean;
@@ -197,7 +197,7 @@ export const api = {
   statistics: {
     getRestaurantStats: (restaurantId: string, period?: 'all' | 'week' | 'month' | 'year') => {
       const queryString = period ? `?period=${period}` : '';
-      return api.request(`/statistics/restaurant/${restaurantId}${queryString}`, {
+      return api.request<RestaurantStatisticsResponse>(`/statistics/restaurant/${restaurantId}${queryString}`, {
         method: 'GET',
       });
     },

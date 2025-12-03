@@ -112,3 +112,30 @@ export interface Order {
   createdAt?: string;
   updatedAt?: string;
 }
+
+// --- Restaurant statistics ---
+
+export interface RestaurantStatsPoint {
+  label: string; // e.g. 'Тиждень 1', 'Січ', '2025-01'
+  orders: number;
+  revenue: number;
+  moneySaved: number;
+}
+
+export interface RestaurantStatsCharts {
+  weekly: RestaurantStatsPoint[];
+  monthly: RestaurantStatsPoint[];
+}
+
+export interface RestaurantStatsSummary {
+  totalFoodSaved: number;
+  totalMoneySaved: number;
+  totalRevenue: number;
+  totalOrders: number;
+  averageRating: number | null;
+}
+
+export interface RestaurantStatisticsResponse {
+  summary: RestaurantStatsSummary;
+  charts: RestaurantStatsCharts;
+}

@@ -1,27 +1,11 @@
 import { Tabs, Redirect } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
-import { Home, Search, ShoppingBag, Store, User } from 'lucide-react-native';
+import { Home, Search, ShoppingBag, Store, User, BarChart3 } from 'lucide-react-native';
 import { useAuth } from '../../hooks/useAuth';
 
-type TabConfig = {
-  name: string;
-  title: string;
-  Icon: typeof Home;
+export const unstable_settings = {
+  ignoreFileSystemRoutes: true,
 };
-
-const customerTabs: TabConfig[] = [
-  { name: 'index', title: 'Головна', Icon: Home },
-  { name: 'explore', title: 'Пошук', Icon: Search },
-  { name: 'orders', title: 'Замовлення', Icon: ShoppingBag },
-  { name: 'profile', title: 'Профіль', Icon: User },
-];
-
-const restaurantTabs: TabConfig[] = [
-  { name: 'index', title: 'Головна', Icon: Home },
-  { name: 'orders', title: 'Замовлення', Icon: ShoppingBag },
-  { name: 'manage', title: 'Управління', Icon: Store },
-  { name: 'profile', title: 'Профіль', Icon: User },
-];
 
 export default function TabLayout() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -37,8 +21,6 @@ export default function TabLayout() {
   if (!isAuthenticated) {
     return <Redirect href="/(auth)/welcome" />;
   }
-
-  const tabsToRender = user?.role === 'restaurant_owner' ? restaurantTabs : customerTabs;
 
   return (
     <Tabs
@@ -60,16 +42,62 @@ export default function TabLayout() {
         },
       }}
     >
-      {tabsToRender.map(({ name, title, Icon }) => (
-        <Tabs.Screen
-          key={name}
-          name={name}
-          options={{
-            title,
-            tabBarIcon: ({ size, color }) => <Icon size={size} color={color} />,
-          }}
-        />
-      ))}
+      {/* Common home tab */}
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Головна',
+          tabBarIcon: ({ size, color }) => <Home size={size} color={color} />,
+        }}
+      />
+
+      {/* Explore: only for regular users */}
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: 'Пошук',
+          href: user?.role === 'restaurant_owner' ? null : '/(tabs)/explore',
+          tabBarIcon: ({ size, color }) => <Search size={size} color={color} />,
+        }}
+      />
+
+      {/* Stats: only for restaurant owners */}
+      <Tabs.Screen
+        name="stats"
+        options={{
+          title: 'Статистика',
+          href: user?.role === 'restaurant_owner' ? '/(tabs)/stats' : null,
+          tabBarIcon: ({ size, color }) => <BarChart3 size={size} color={color} />,
+        }}
+      />
+
+      {/* Orders: visible for both */}
+      <Tabs.Screen
+        name="orders"
+        options={{
+          title: user?.role === 'restaurant_owner' ? 'Замовлення' : 'Мої замовлення',
+          tabBarIcon: ({ size, color }) => <ShoppingBag size={size} color={color} />,
+        }}
+      />
+
+      {/* Manage: only for restaurant owners */}
+      <Tabs.Screen
+        name="manage"
+        options={{
+          title: 'Управління',
+          href: user?.role === 'restaurant_owner' ? '/(tabs)/manage' : null,
+          tabBarIcon: ({ size, color }) => <Store size={size} color={color} />,
+        }}
+      />
+
+      {/* Profile: visible for both */}
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Профіль',
+          tabBarIcon: ({ size, color }) => <User size={size} color={color} />,
+        }}
+      />
     </Tabs>
   );
 }
