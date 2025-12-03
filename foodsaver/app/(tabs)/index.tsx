@@ -81,9 +81,10 @@ export default function HomeScreen() {
                 >
                   <Image
                     source={{
-                      uri:
-                        item.imageUrl ||
-                        'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg',
+                      uri: item.imageBase64
+                      ? `data:image/jpeg;base64,${item.imageBase64}`
+                      : 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg'
+                    
                     }}
                     style={styles.foodImage}
                   />

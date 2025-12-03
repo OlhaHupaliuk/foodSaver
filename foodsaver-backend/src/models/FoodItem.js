@@ -42,6 +42,7 @@ const foodItemSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    imageBase64: { type: String },
     // Location inherited from restaurant (for map display)
     location: {
       type: {

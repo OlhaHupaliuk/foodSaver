@@ -90,7 +90,7 @@ export interface FoodItem {
   isAvailable: boolean;
   expiryTime: string;
   location?: GeoLocation;
-  imageUrl?: string;
+  imageBase64?: string;
   distance?: number;
   createdAt?: string;
   updatedAt?: string;
