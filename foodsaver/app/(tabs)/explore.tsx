@@ -8,7 +8,7 @@ import { FoodItem } from '../../types/auth';
 import { getDefaultCoordinates, getUserLocation } from '../../services/location';
 import { useOrderActions } from '../../hooks/useOrderActions';
 import { useAuth } from '../../hooks/useAuth';
-import { MapPin, Clock, Percent, ShoppingBag } from 'lucide-react-native';
+import { MapPin, Clock, Percent, ShoppingBag, ChevronUp, ChevronDown } from 'lucide-react-native';
 
 const DEFAULT_REGION_DELTA = 0.05;
 
@@ -47,10 +47,15 @@ export default function ExploreScreen() {
   );
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
   const [maxDistanceKm, setMaxDistanceKm] = useState<number | null>(null);
+  const [isBottomSheetCollapsed, setIsBottomSheetCollapsed] = useState(false);
   const { orderingItemId, confirmAndPlaceOrder } = useOrderActions();
   
   // Restaurant owners cannot place orders
   const canPlaceOrder = user?.role !== 'restaurant_owner';
+  
+  const toggleBottomSheet = () => {
+    setIsBottomSheetCollapsed(!isBottomSheetCollapsed);
+  };
 
   useEffect(() => {
     (async () => {
@@ -259,16 +264,47 @@ export default function ExploreScreen() {
         </View>
       </View>
 
-      <View style={styles.bottomSheet}>
-        <View style={styles.sheetHeader}>
-          <Text style={styles.sheetTitle}>Поруч</Text>
-          <TouchableOpacity onPress={loadFoodItems}>
-            <Text style={styles.refreshText}>Оновити</Text>
-          </TouchableOpacity>
-        </View>
+      <View style={[
+        styles.bottomSheet,
+        isBottomSheetCollapsed && styles.bottomSheetCollapsed
+      ]}>
+        <TouchableOpacity 
+          style={styles.sheetHeader}
+          onPress={toggleBottomSheet}
+          activeOpacity={0.7}
+        >
+          <View style={styles.sheetHeaderLeft}>
+            <Text style={styles.sheetTitle}>Поруч</Text>
+            {!isBottomSheetCollapsed && (
+              <Text style={styles.sheetSubtitle}>
+                {availableItems.length} {availableItems.length === 1 ? 'позиція' : 'позицій'}
+              </Text>
+            )}
+          </View>
+          <View style={styles.sheetHeaderRight}>
+            {!isBottomSheetCollapsed && (
+              <TouchableOpacity 
+                onPress={(e) => {
+                  e.stopPropagation();
+                  loadFoodItems();
+                }}
+                style={styles.refreshButton}
+              >
+                <Text style={styles.refreshText}>Оновити</Text>
+              </TouchableOpacity>
+            )}
+            {isBottomSheetCollapsed ? (
+              <ChevronUp size={20} color="#10b981" />
+            ) : (
+              <ChevronDown size={20} color="#10b981" />
+            )}
+          </View>
+        </TouchableOpacity>
 
-        {!isRestaurant && (
-          <View style={styles.filtersRow}>
+        {!isBottomSheetCollapsed && (
+          <>
+            {!isRestaurant && (
+              <View style={styles.filtersRow}>
             <View style={styles.filterGroup}>
               <Text style={styles.filterLabel}>Ціна</Text>
               <View style={styles.chipRow}>
@@ -374,6 +410,8 @@ export default function ExploreScreen() {
             ))}
           </ScrollView>
         )}
+          </>
+        )}
       </View>
     </View>
   );
@@ -431,25 +469,52 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 14,
     paddingBottom: 24,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderTopWidth: 1,
     borderColor: '#e5e7eb',
+    maxHeight: 400,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: -5 },
+    elevation: 10,
+  },
+  bottomSheetCollapsed: {
+    maxHeight: 60,
+    paddingBottom: 14,
   },
   sheetHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    paddingVertical: 4,
+  },
+  sheetHeaderLeft: {
+    flex: 1,
+  },
+  sheetHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   sheetTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#111827',
   },
+  sheetSubtitle: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginTop: 2,
+  },
+  refreshButton: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
   refreshText: {
     color: '#10b981',
-    fontWeight: '500',
+    fontWeight: '600',
     fontSize: 14,
   },
   emptyText: {
@@ -488,9 +553,9 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   callout: {
-    width: 280,
+    width: 220,
     backgroundColor: '#ffffff',
-    borderRadius: 12,
+    borderRadius: 10,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOpacity: 0.2,
@@ -500,52 +565,52 @@ const styles = StyleSheet.create({
   },
   calloutImage: {
     width: '100%',
-    height: 120,
+    height: 80,
     backgroundColor: '#e5e7eb',
   },
   calloutContent: {
-    padding: 12,
+    padding: 10,
   },
   calloutTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
     color: '#111827',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   calloutDescription: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#6b7280',
-    marginBottom: 8,
-    lineHeight: 16,
+    marginBottom: 6,
+    lineHeight: 14,
   },
   calloutRestaurantRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
-    gap: 4,
+    marginBottom: 6,
+    gap: 3,
   },
   calloutRestaurant: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#6b7280',
   },
   calloutPriceRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   calloutPriceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   calloutOriginalPrice: {
-    fontSize: 12,
+    fontSize: 10,
     color: '#9ca3af',
     textDecorationLine: 'line-through',
   },
   calloutDiscountPrice: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
     color: '#10b981',
   },
@@ -553,13 +618,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#f97316',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 4,
-    gap: 3,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 3,
+    gap: 2,
   },
   calloutDiscountText: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '700',
     color: '#ffffff',
   },
@@ -567,20 +632,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   calloutTimeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 3,
   },
   calloutTimeText: {
-    fontSize: 11,
+    fontSize: 10,
     color: '#ef4444',
     fontWeight: '600',
   },
   calloutQuantity: {
-    fontSize: 11,
+    fontSize: 10,
     color: '#6b7280',
   },
   calloutOrderButton: {
@@ -588,39 +653,39 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    gap: 6,
-    marginTop: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    gap: 4,
+    marginTop: 2,
   },
   calloutOrderButtonText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
     color: '#ffffff',
   },
   calloutInfoBox: {
     backgroundColor: '#f3f4f6',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    marginTop: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginTop: 2,
   },
   calloutInfoText: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#6b7280',
     textAlign: 'center',
     fontWeight: '500',
   },
   calloutUnavailableBox: {
     backgroundColor: '#fee2e2',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    marginTop: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginTop: 2,
   },
   calloutUnavailableText: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#dc2626',
     textAlign: 'center',
     fontWeight: '600',
