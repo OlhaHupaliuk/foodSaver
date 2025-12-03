@@ -22,7 +22,10 @@ exports.getOrders = async (req, res, next) => {
     const orders = await Order.find(query)
       .populate("user", "name email phone")
       .populate("restaurant", "name address phone")
-      .populate("items.foodItem", "title originalPrice discountedPrice")
+      .populate(
+        "items.foodItem",
+        "title originalPrice discountedPrice expiryTime"
+      )
       .sort({ createdAt: -1 });
 
     res.json({
