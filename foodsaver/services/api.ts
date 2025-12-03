@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthResponse, AuthLoginResponse, GetMeResponse, AuthUser, AuthError, AuthErrorType, FoodItem } from '../types/auth';
 
-const API_URL = 'http://192.168.0.100:5000/api';
+const API_URL = 'http://10.10.10.73:5000/api';
 
 interface FetchOptions extends RequestInit {
   skipAuth?: boolean;

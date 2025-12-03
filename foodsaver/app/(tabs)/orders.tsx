@@ -26,7 +26,33 @@ export default function OrdersScreen() {
       const response = await api.orders.getAll();
       if (response.status === 'success' && response.data) {
         const data = response.data as { orders?: Order[] };
-        setOrders(data.orders || []);
+        const list = data.orders || [];
+
+        const now = new Date();
+        let filtered = list;
+
+        // For restaurant owners, hide orders where all related food items are already expired
+        if (user?.role === 'restaurant_owner') {
+          filtered = list.filter((order) => {
+            if (!order.items || order.items.length === 0) return false;
+
+            return order.items.some((orderItem) => {
+              const food = orderItem.foodItem as any;
+              if (!food || typeof food === 'string') {
+                return true;
+              }
+
+              if (!food.expiryTime) {
+                return true;
+              }
+
+              const expiry = new Date(food.expiryTime);
+              return expiry > now;
+            });
+          });
+        }
+
+        setOrders(filtered);
       }
     } catch (error) {
       console.error('Error loading orders:', error);
@@ -121,6 +147,9 @@ export default function OrdersScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Замовлення</Text>
+        <TouchableOpacity style={styles.refreshButton} onPress={loadOrders} disabled={loading}>
+          <Text style={styles.refreshText}>{loading ? 'Оновлення...' : 'Оновити'}</Text>
+        </TouchableOpacity>
       </View>
 
       {loading ? (
@@ -257,11 +286,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#111827',
+  },
+  refreshButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  refreshText: {
+    fontSize: 13,
+    color: '#10b981',
+    fontWeight: '500',
   },
   content: {
     flex: 1,

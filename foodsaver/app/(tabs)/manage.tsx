@@ -1,6 +1,8 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, Image } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Plus, X, Clock, DollarSign, Trash2, Image as ImageIcon } from 'lucide-react-native';
+// @ts-ignore - expo-image-picker types will be available after dependencies are installed
+import * as ImagePicker from 'expo-image-picker';
 import { formatPrice } from '../../utils/format';
 import { getTimeUntilExpiry } from '../../utils/discount';
 import { useAuth } from '../../hooks/useAuth';
@@ -23,6 +25,7 @@ export default function ManageScreen() {
     expiry_hours: '6',
     imageUrl: '',
   });
+  const [pickingImage, setPickingImage] = useState(false);
 
   useEffect(() => {
     if (user?.role === 'restaurant_owner') {
@@ -56,6 +59,10 @@ export default function ManageScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRefresh = () => {
+    loadFoodItems();
   };
 
   const loadRestaurantData = async () => {
@@ -210,6 +217,35 @@ export default function ManageScreen() {
     setNewItem({ ...newItem, imageUrl: '' });
   };
 
+  const pickImageFromGallery = async () => {
+    try {
+      setPickingImage(true);
+
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Доступ заборонено', 'Надайте доступ до галереї, щоб додати фото страви');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const uri = result.assets[0].uri;
+        setNewItem({ ...newItem, imageUrl: uri });
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Помилка', 'Не вдалося обрати зображення');
+    } finally {
+      setPickingImage(false);
+    }
+  };
+
   if (!restaurant) {
     return (
       <View style={styles.container}>
@@ -233,12 +269,21 @@ export default function ManageScreen() {
           <Text style={styles.title}>Управління</Text>
           <Text style={styles.headerSubtitle}>{restaurant.name}</Text>
         </View>
-        <TouchableOpacity 
-          style={styles.addButton} 
-          onPress={() => setShowAddModal(true)}
-        >
-          <Plus size={24} color="#ffffff" />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity 
+            style={styles.refreshHeaderButton}
+            onPress={handleRefresh}
+            disabled={loading}
+          >
+            <Text style={styles.refreshHeaderText}>{loading ? 'Оновлення...' : 'Оновити'}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.addButton} 
+            onPress={() => setShowAddModal(true)}
+          >
+            <Plus size={24} color="#ffffff" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {loading ? (
@@ -389,7 +434,7 @@ export default function ManageScreen() {
 
               {/* Image URL Input */}
               <View style={styles.imageSection}>
-                <Text style={styles.imageLabel}>URL зображення (необов'язково)</Text>
+                <Text style={styles.imageLabel}>Фото страви (необов'язково)</Text>
                 {newItem.imageUrl ? (
                   <View style={styles.imagePreviewContainer}>
                     <Image source={{ uri: newItem.imageUrl }} style={styles.imagePreview} />
@@ -402,18 +447,20 @@ export default function ManageScreen() {
                     </TouchableOpacity>
                   </View>
                 ) : null}
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder="https://example.com/image.jpg"
-                  placeholderTextColor="#9ca3af"
-                  value={newItem.imageUrl}
-                  onChangeText={(text) => setNewItem({ ...newItem, imageUrl: text })}
-                  autoCapitalize="none"
-                  keyboardType="url"
-                  editable={!saving}
-                />
+                <View style={styles.imageActionsRow}>
+                  <TouchableOpacity
+                    style={[styles.imagePickerButton, (saving || pickingImage) && styles.imagePickerButtonDisabled]}
+                    onPress={pickImageFromGallery}
+                    disabled={saving || pickingImage}
+                  >
+                    <ImageIcon size={18} color="#ffffff" />
+                    <Text style={styles.imagePickerButtonText}>
+                      {pickingImage ? 'Вибір...' : 'Обрати з галереї'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
                 <Text style={styles.imageHint}>
-                  Введіть URL зображення або залиште порожнім
+                  Ви можете обрати фото з галереї. За потреби можна буде додати підтримку завантаження на сервер.
                 </Text>
               </View>
 
@@ -509,6 +556,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   headerSubtitle: {
     fontSize: 13,
     color: '#6b7280',
@@ -531,6 +583,19 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
+  },
+  refreshHeaderButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    marginRight: 4,
+  },
+  refreshHeaderText: {
+    fontSize: 13,
+    color: '#10b981',
+    fontWeight: '500',
   },
   content: {
     flex: 1,
@@ -828,5 +893,28 @@ const styles = StyleSheet.create({
     height: 32,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  imageActionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 12,
+  },
+  imagePickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#10b981',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 999,
+  },
+  imagePickerButtonDisabled: {
+    opacity: 0.6,
+  },
+  imagePickerButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ffffff',
   },
 });
