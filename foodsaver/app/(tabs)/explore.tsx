@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity, Image } from 'react-native';
 import MapView, { Marker, Callout, Region } from 'react-native-maps';
 import { useEffect, useMemo, useState } from 'react';
 import { formatPrice } from '../../utils/format';
@@ -8,6 +8,7 @@ import { FoodItem } from '../../types/auth';
 import { getDefaultCoordinates, getUserLocation } from '../../services/location';
 import { useOrderActions } from '../../hooks/useOrderActions';
 import { useAuth } from '../../hooks/useAuth';
+import { MapPin, Clock, Percent, ShoppingBag } from 'lucide-react-native';
 
 const DEFAULT_REGION_DELTA = 0.05;
 
@@ -154,18 +155,96 @@ export default function ExploreScreen() {
               pinColor="#10b981"
               tracksViewChanges={false}
             >
-              <Callout onPress={canPlaceOrder ? () => confirmAndPlaceOrder(item) : undefined}>
+              <Callout>
                 <View style={styles.callout}>
-                  <Text style={styles.calloutTitle}>{item.title}</Text>
-                  <Text style={styles.calloutSubtitle}>
-                    {formatPrice(item.discountedPrice)} · {getTimeUntilExpiry(item.expiryTime)}
-                  </Text>
-                  {canPlaceOrder && (
-                    <Text style={styles.calloutAction}>Натисніть, щоб замовити</Text>
+                  {item.imageBase64 && (
+                    <Image
+                      source={{
+                        uri: `data:image/jpeg;base64,${item.imageBase64}`
+                      }}
+                      style={styles.calloutImage}
+                    />
                   )}
-                  {!canPlaceOrder && (
-                    <Text style={styles.calloutInfo}>Переглянути деталі</Text>
-                  )}
+                  <View style={styles.calloutContent}>
+                    <Text style={styles.calloutTitle}>{item.title}</Text>
+                    
+                    {item.description && (
+                      <Text style={styles.calloutDescription} numberOfLines={2}>
+                        {item.description}
+                      </Text>
+                    )}
+                    
+                    {typeof item.restaurant !== 'string' && item.restaurant?.name && (
+                      <View style={styles.calloutRestaurantRow}>
+                        <MapPin size={12} color="#6b7280" />
+                        <Text style={styles.calloutRestaurant}>
+                          {item.restaurant.name}
+                        </Text>
+                      </View>
+                    )}
+                    
+                    <View style={styles.calloutPriceRow}>
+                      <View style={styles.calloutPriceContainer}>
+                        <Text style={styles.calloutOriginalPrice}>
+                          {formatPrice(item.originalPrice)}
+                        </Text>
+                        <Text style={styles.calloutDiscountPrice}>
+                          {formatPrice(item.discountedPrice)}
+                        </Text>
+                      </View>
+                      <View style={styles.calloutDiscountBadge}>
+                        <Percent size={10} color="#ffffff" />
+                        <Text style={styles.calloutDiscountText}>
+                          {Math.round(
+                            (1 - (item.discountedPrice ?? 0) / (item.originalPrice || 1)) * 100
+                          )}%
+                        </Text>
+                      </View>
+                    </View>
+                    
+                    <View style={styles.calloutInfoRow}>
+                      <View style={styles.calloutTimeRow}>
+                        <Clock size={12} color="#ef4444" />
+                        <Text style={styles.calloutTimeText}>
+                          {getTimeUntilExpiry(item.expiryTime)}
+                        </Text>
+                      </View>
+                      {item.quantity > 0 && (
+                        <Text style={styles.calloutQuantity}>
+                          Залишилось: {item.quantity}
+                        </Text>
+                      )}
+                    </View>
+                    
+                    {canPlaceOrder && item.isAvailable && (
+                      <TouchableOpacity
+                        style={styles.calloutOrderButton}
+                        onPress={() => confirmAndPlaceOrder(item)}
+                        disabled={orderingItemId === item.id}
+                      >
+                        {orderingItemId === item.id ? (
+                          <ActivityIndicator size="small" color="#ffffff" />
+                        ) : (
+                          <>
+                            <ShoppingBag size={16} color="#ffffff" />
+                            <Text style={styles.calloutOrderButtonText}>Замовити</Text>
+                          </>
+                        )}
+                      </TouchableOpacity>
+                    )}
+                    
+                    {!canPlaceOrder && (
+                      <View style={styles.calloutInfoBox}>
+                        <Text style={styles.calloutInfoText}>Переглянути деталі</Text>
+                      </View>
+                    )}
+                    
+                    {!item.isAvailable && (
+                      <View style={styles.calloutUnavailableBox}>
+                        <Text style={styles.calloutUnavailableText}>Недоступно</Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
               </Callout>
             </Marker>
@@ -409,24 +488,142 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   callout: {
-    maxWidth: 220,
+    width: 280,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
+  },
+  calloutImage: {
+    width: '100%',
+    height: 120,
+    backgroundColor: '#e5e7eb',
+  },
+  calloutContent: {
+    padding: 12,
   },
   calloutTitle: {
+    fontSize: 16,
     fontWeight: '700',
-    marginBottom: 4,
-  },
-  calloutSubtitle: {
-    color: '#6b7280',
+    color: '#111827',
     marginBottom: 6,
   },
-  calloutAction: {
+  calloutDescription: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginBottom: 8,
+    lineHeight: 16,
+  },
+  calloutRestaurantRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 4,
+  },
+  calloutRestaurant: {
+    fontSize: 12,
+    color: '#6b7280',
+  },
+  calloutPriceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  calloutPriceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  calloutOriginalPrice: {
+    fontSize: 12,
+    color: '#9ca3af',
+    textDecorationLine: 'line-through',
+  },
+  calloutDiscountPrice: {
+    fontSize: 18,
+    fontWeight: '700',
     color: '#10b981',
+  },
+  calloutDiscountBadge: {
+    backgroundColor: '#f97316',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+    gap: 3,
+  },
+  calloutDiscountText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  calloutInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  calloutTimeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  calloutTimeText: {
+    fontSize: 11,
+    color: '#ef4444',
+    fontWeight: '600',
+  },
+  calloutQuantity: {
+    fontSize: 11,
+    color: '#6b7280',
+  },
+  calloutOrderButton: {
+    backgroundColor: '#10b981',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 6,
+    marginTop: 4,
+  },
+  calloutOrderButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ffffff',
+  },
+  calloutInfoBox: {
+    backgroundColor: '#f3f4f6',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginTop: 4,
+  },
+  calloutInfoText: {
+    fontSize: 12,
+    color: '#6b7280',
+    textAlign: 'center',
     fontWeight: '500',
   },
-  calloutInfo: {
-    color: '#6b7280',
-    fontWeight: '500',
+  calloutUnavailableBox: {
+    backgroundColor: '#fee2e2',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginTop: 4,
+  },
+  calloutUnavailableText: {
     fontSize: 12,
+    color: '#dc2626',
+    textAlign: 'center',
+    fontWeight: '600',
   },
   filtersRow: {
     marginTop: 2,
