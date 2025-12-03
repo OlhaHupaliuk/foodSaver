@@ -222,7 +222,7 @@ export default function ProfileScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Профіль</Text>
         <TouchableOpacity onPress={handleOpenEditProfile} style={styles.editButton}>
-          <Edit2 size={20} color="#10b981" />
+          <Edit2 size={20} color="#1B7F5F" />
         </TouchableOpacity>
       </View>
 
@@ -234,21 +234,18 @@ export default function ProfileScreen() {
             ) : (
               <View style={[styles.avatar, hasRestaurant && styles.avatarRestaurant]}>
                 {hasRestaurant ? (
-                  <Store size={48} color="#10b981" />
+                  <Store size={48} color="#1B7F5F" />
                 ) : (
-                  <User size={48} color="#10b981" />
+                  <User size={48} color="#1B7F5F" />
                 )}
               </View>
-            )}
-            {hasRestaurant && (
-              <Text style={styles.restaurantBadge}>Власник ресторану</Text>
             )}
           </View>
 
           <View style={styles.infoSection}>
             {/* Ім'я */}
             <View style={styles.infoRow}>
-              <User size={20} color="#6b7280" />
+              <User size={20} color="#9CA3AF" />
               <View style={styles.infoContent}>
                 <Text style={styles.infoLabel}>Ім'я</Text>
                 <Text style={styles.infoValue}>{user?.name || ''}</Text>
@@ -257,7 +254,7 @@ export default function ProfileScreen() {
 
             {/* Email */}
             <View style={styles.infoRow}>
-              <Mail size={20} color="#6b7280" />
+              <Mail size={20} color="#9CA3AF" />
               <View style={styles.infoContent}>
                 <Text style={styles.infoLabel}>Email</Text>
                 <Text style={styles.infoValue}>{user?.email || ''}</Text>
@@ -267,7 +264,7 @@ export default function ProfileScreen() {
             {/* Телефон */}
             {user?.phone && (
               <View style={styles.infoRow}>
-                <Phone size={20} color="#6b7280" />
+                <Phone size={20} color="#9CA3AF" />
                 <View style={styles.infoContent}>
                   <Text style={styles.infoLabel}>Телефон</Text>
                   <Text style={styles.infoValue}>{user.phone}</Text>
@@ -284,12 +281,12 @@ export default function ProfileScreen() {
                   <View style={styles.sectionHeader}>
                     <Text style={styles.sectionTitle}>Мій ресторан</Text>
                     <TouchableOpacity onPress={handleOpenEditRestaurant} style={styles.editIconButton}>
-                      <Edit2 size={18} color="#10b981" />
+                      <Edit2 size={18} color="#1B7F5F" />
                     </TouchableOpacity>
                   </View>
 
                   <View style={styles.infoRow}>
-                    <Store size={20} color="#10b981" />
+                    <Store size={20} color="#1B7F5F" />
                     <View style={styles.infoContent}>
                       <Text style={styles.infoLabel}>Назва</Text>
                       <Text style={styles.infoValue}>{user.restaurant.name}</Text>
@@ -297,7 +294,7 @@ export default function ProfileScreen() {
                   </View>
 
                   <View style={styles.infoRow}>
-                    <Phone size={20} color="#10b981" />
+                    <Phone size={20} color="#1B7F5F" />
                     <View style={styles.infoContent}>
                       <Text style={styles.infoLabel}>Телефон</Text>
                       <Text style={styles.infoValue}>{user.restaurant.phone}</Text>
@@ -305,7 +302,7 @@ export default function ProfileScreen() {
                   </View>
 
                   <View style={styles.infoRow}>
-                    <MapPin size={20} color="#10b981" />
+                    <MapPin size={20} color="#1B7F5F" />
                     <View style={styles.infoContent}>
                       <Text style={styles.infoLabel}>Адреса</Text>
                       <Text style={styles.infoValue}>{user.restaurant.address}</Text>
@@ -317,9 +314,9 @@ export default function ProfileScreen() {
                       style={styles.mapLinkButton}
                       onPress={handleOpenMaps}
                     >
-                      <MapPin size={18} color="#10b981" />
+                      <MapPin size={18} color="#1B7F5F" />
                       <Text style={styles.mapLinkText}>Відкрити на Google Maps</Text>
-                      <ExternalLink size={16} color="#10b981" />
+                      <ExternalLink size={16} color="#1B7F5F" />
                     </TouchableOpacity>
                   )}
 
@@ -336,7 +333,7 @@ export default function ProfileScreen() {
                 style={styles.createRestaurantButton}
                 onPress={() => setShowCreateRestaurant(true)}
               >
-                <Plus size={20} color="#10b981" />
+                <Plus size={20} color="#1B7F5F" />
                 <Text style={styles.createRestaurantText}>Створити ресторан</Text>
               </TouchableOpacity>
             )}
@@ -469,7 +466,7 @@ export default function ProfileScreen() {
                   <Image source={{ uri: profileData.photo }} style={styles.editAvatarImage} />
                 ) : (
                   <View style={styles.editAvatar}>
-                    <User size={48} color="#10b981" />
+                    <User size={48} color="#1B7F5F" />
                   </View>
                 )}
                 <View style={styles.photoButtonsRow}>
@@ -478,7 +475,7 @@ export default function ProfileScreen() {
                     onPress={handlePickImage}
                     disabled={saving}
                   >
-                    <Camera size={20} color="#10b981" />
+                    <Camera size={20} color="#1B7F5F" />
                     <Text style={styles.photoButtonText}>
                       {profileData.photo ? 'Змінити фото' : 'Додати фото'}
                     </Text>
@@ -638,15 +635,15 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#0A0A0F',
   },
   header: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#151520',
     paddingTop: 60,
     paddingBottom: 16,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: '#2A2A3E',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -657,22 +654,21 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#111827',
+    color: '#E5E5F0',
   },
   content: {
     flex: 1,
     padding: 20,
   },
   profileCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
+    backgroundColor: '#1A1A2E',
+    borderRadius: 20,
     padding: 24,
     marginBottom: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    elevation: 8,
+    shadowRadius: 12,
+    borderWidth: 1,
+    borderColor: '#2A2A3E',
   },
   avatarContainer: {
     alignItems: 'center',
@@ -682,17 +678,19 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: '#d1fae5',
+    backgroundColor: '#2A2A3E',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
+    borderWidth: 2,
+    borderColor: '#1B7F5F',
   },
   avatarRestaurant: {
-    backgroundColor: '#dbeafe',
+    backgroundColor: '#2A2A3E',
   },
   avatarImage: {
-    width: 96,
-    height: 96,
+    width: 100,
+    height: 100,
     borderRadius: 48,
     marginBottom: 8,
   },
@@ -700,10 +698,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#10b981',
-    backgroundColor: '#d1fae5',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#1B7F5F',
   },
   infoSection: {
     gap: 16,
@@ -718,17 +717,17 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 12,
-    color: '#9ca3af',
+    color: '#9CA3AF',
     marginBottom: 2,
   },
   infoValue: {
     fontSize: 16,
-    color: '#111827',
+    color: '#E5E5F0',
     fontWeight: '500',
   },
   divider: {
     height: 1,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: '#2A2A3E',
     marginVertical: 16,
   },
   restaurantSection: {
@@ -743,7 +742,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#10b981',
+    color: '#1B7F5F',
   },
   editIconButton: {
     padding: 4,
@@ -751,22 +750,23 @@ const styles = StyleSheet.create({
   mapLinkButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#d1fae5',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 12,
     gap: 8,
     marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#1B7F5F',
   },
   mapLinkText: {
     flex: 1,
     fontSize: 14,
     fontWeight: '600',
-    color: '#10b981',
+    color: '#1B7F5F',
   },
   description: {
     fontSize: 13,
-    color: '#6b7280',
+    color: '#9CA3AF',
     lineHeight: 18,
     marginTop: 8,
     fontStyle: 'italic',
@@ -775,10 +775,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f0fdf4',
-    borderRadius: 12,
+    backgroundColor: '#1A1A2E',
+    borderRadius: 16,
     borderWidth: 2,
-    borderColor: '#10b981',
+    borderColor: '#1B7F5F',
     borderStyle: 'dashed',
     padding: 16,
     gap: 8,
@@ -786,35 +786,37 @@ const styles = StyleSheet.create({
   createRestaurantText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#10b981',
+    color: '#1B7F5F',
   },
   signOutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
+    backgroundColor: '#1A1A2E',
+    borderRadius: 16,
     padding: 16,
     gap: 8,
     borderWidth: 1,
-    borderColor: '#fee2e2',
+    borderColor: '#2A1A1A',
     marginBottom: 20,
   },
   signOutText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#ef4444',
+    color: '#FF4D6D',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#151520',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '97%',
+    borderTopWidth: 1,
+    borderTopColor: '#2A2A3E',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -822,25 +824,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: '#2A2A3E',
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111827',
+    color: '#E5E5F0',
   },
   modalForm: {
     paddingHorizontal: 20,
-    paddingVertical: 60,
+    paddingVertical: 30,
   },
   modalInput: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#1A1A2E',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#2A2A3E',
     padding: 16,
     fontSize: 16,
-    color: '#111827',
+    color: '#E5E5F0',
     marginBottom: 16,
   },
   modalInputMultiline: {
@@ -848,11 +850,15 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   modalButton: {
-    backgroundColor: '#10b981',
-    borderRadius: 12,
+    backgroundColor: '#1B7F5F',
+    borderRadius: 16,
     padding: 16,
     alignItems: 'center',
     marginTop: 8,
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
   },
   modalButtonDisabled: {
     opacity: 0.6,
@@ -863,17 +869,19 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   modalCancelButton: {
-    backgroundColor: '#f9fafb',
-    borderRadius: 12,
+    backgroundColor: '#1A1A2E',
+    borderRadius: 16,
     padding: 16,
     alignItems: 'center',
     marginTop: 12,
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#2A2A3E',
   },
   modalCancelButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#6b7280',
+    color: '#9CA3AF',
   },
   photoSection: {
     alignItems: 'center',
@@ -883,16 +891,20 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#d1fae5',
+    backgroundColor: '#2A2A3E',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
+    borderWidth: 2,
+    borderColor: '#1B7F5F',
   },
   editAvatarImage: {
     width: 120,
     height: 120,
     borderRadius: 60,
     marginBottom: 12,
+    borderWidth: 2,
+    borderColor: '#1B7F5F',
   },
   photoButtonsRow: {
     flexDirection: 'row',
@@ -903,32 +915,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#f0fdf4',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#10b981',
+    borderColor: '#1B7F5F',
   },
   photoButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#10b981',
+    color: '#1B7F5F',
   },
   removePhotoButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#fef2f2',
+    backgroundColor: '#2A1A1A',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#fecaca',
+    borderColor: '#F87171',
   },
   removePhotoButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#ef4444',
+    color: '#F87171',
   },
 });

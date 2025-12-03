@@ -8,7 +8,7 @@ export default function WelcomeScreen() {
       <View style={styles.content}>
         <View style={styles.logoContainer}>
           <View style={styles.logo}>
-            <Leaf size={64} color="#10b981" />
+            <Leaf size={64} color="#1B7F5F" />
           </View>
           <Text style={styles.appName}>FoodSaver</Text>
           <Text style={styles.tagline}>Рятуйте їжу. Економте гроші.</Text>
@@ -43,7 +43,7 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#0A0A0F',
   },
   content: {
     flex: 1,
@@ -55,29 +55,31 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
     marginBottom: 32,
-    gap: 8,
+    gap: 16,
   },
   logo: {
     width: 140,
     height: 140,
     borderRadius: 70,
-    backgroundColor: '#fff',
+    backgroundColor: '#1A1A2E',
+    marginBottom: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#10b981',
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
+    shadowColor: '#1B7F5F',
+    shadowOpacity: 0.4,
+    shadowRadius: 50,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 10,
   },
   appName: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#111827',
+    color: '#E5E5F0',
     marginBottom: 8,
   },
   tagline: {
     fontSize: 16,
-    color: '#6b7280',
+    color: '#9CA3AF',
   },
   features: {
     alignItems: 'center',
@@ -86,7 +88,7 @@ const styles = StyleSheet.create({
   },
   featureText: {
     fontSize: 16,
-    color: '#374151',
+    color: '#E5E5F0',
     textAlign: 'center',
   },
   actions: {
@@ -94,10 +96,15 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   primaryButton: {
-    backgroundColor: '#10b981',
-    borderRadius: 12,
+    backgroundColor: '#1B7F5F',
+    borderRadius: 16,
     padding: 16,
     alignItems: 'center',
+    shadowColor: '#1B7F5F',
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
   },
   primaryButtonText: {
     fontSize: 18,
@@ -105,14 +112,13 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   secondaryButton: {
-    backgroundColor: '#f3f4f6',
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     alignItems: 'center',
   },
   secondaryButtonText: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#374151',
+    fontWeight: '500',
+    color: '#b1b1b1ff',
   },
 });

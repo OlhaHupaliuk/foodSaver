@@ -141,7 +141,7 @@ export default function OrdersScreen() {
       completed: '#10b981',
       cancelled: '#ef4444',
     };
-    return colorMap[status] || '#6b7280';
+    return colorMap[status] || '#9CA3AF';
   };
 
   const getOrderSummary = (order: Order) => {
@@ -294,15 +294,15 @@ export default function OrdersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#0A0A0F',
   },
   header: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#151520',
     paddingTop: 60,
     paddingBottom: 16,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: '#2A2A3E',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -310,14 +310,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#111827',
+    color: '#E5E5F0',
   },
   refreshButton: {
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#2A2A3E',
   },
   refreshText: {
     fontSize: 13,
@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#6b7280',
+    color: '#9CA3AF',
   },
   loadingContainer: {
     flex: 1,
@@ -344,11 +344,11 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#9CA3AF',
     marginTop: 12,
   },
   orderCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1A1A2E',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -361,18 +361,18 @@ const styles = StyleSheet.create({
   customerName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    color: '#E5E5F0',
     flex: 1,
     marginBottom: 4,
   },
   customerPhone: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#9CA3AF',
     marginTop: 2,
   },
   customerEmail: {
     fontSize: 12,
-    color: '#9ca3af',
+    color: '#9CA3AF',
     marginTop: 2,
   },
   orderHeader: {
@@ -384,12 +384,12 @@ const styles = StyleSheet.create({
   restaurantName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    color: '#E5E5F0',
     flex: 1,
   },
   orderSummary: {
     fontSize: 12,
-    color: '#6b7280',
+    color: '#9CA3AF',
     marginTop: 2,
   },
   statusBadge: {
@@ -422,58 +422,62 @@ const styles = StyleSheet.create({
   },
   pickupTime: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#9CA3AF',
     marginTop: 8,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#151520',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,
     maxHeight: '70%',
+    borderTopWidth: 1,
+    borderTopColor: '#2A2A3E',
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111827',
+    color: '#E5E5F0',
     marginBottom: 8,
   },
   modalSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#9CA3AF',
     marginBottom: 20,
   },
   statusOptions: {
     maxHeight: 300,
   },
   statusOption: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#1A1A2E',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#2A2A3E',
   },
   statusOptionText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    color: '#E5E5F0',
   },
   modalCancelButton: {
-    backgroundColor: '#f9fafb',
-    borderRadius: 12,
+    backgroundColor: '#1A1A2E',
+    borderRadius: 16,
     padding: 16,
     alignItems: 'center',
     marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#2A2A3E',
   },
   modalCancelButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#6b7280',
+    color: '#9CA3AF',
   },
 });

@@ -181,7 +181,7 @@ export default function ExploreScreen() {
                     
                     {typeof item.restaurant !== 'string' && item.restaurant?.name && (
                       <View style={styles.calloutRestaurantRow}>
-                        <MapPin size={12} color="#6b7280" />
+                        <MapPin size={12} color="#9CA3AF" />
                         <Text style={styles.calloutRestaurant}>
                           {item.restaurant.name}
                         </Text>
@@ -209,7 +209,7 @@ export default function ExploreScreen() {
                     
                     <View style={styles.calloutInfoRow}>
                       <View style={styles.calloutTimeRow}>
-                        <Clock size={12} color="#ef4444" />
+                        <Clock size={12} color="#F87171" />
                         <Text style={styles.calloutTimeText}>
                           {getTimeUntilExpiry(item.expiryTime)}
                         </Text>
@@ -420,7 +420,7 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#0A0A0F',
   },
   map: {
     flex: 1,
@@ -434,51 +434,57 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     alignItems: 'center',
     gap: 12,
+    backgroundColor: 'rgba(10, 10, 15, 0.9)',
   },
   loadingText: {
-    color: '#6b7280',
+    color: '#9CA3AF',
   },
   header: {
     position: 'absolute',
     top: 52,
     left: 16,
     right: 16,
-    backgroundColor: 'rgba(255,255,255,0.96)',
+    backgroundColor: 'rgba(26, 26, 46, 0.95)',
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e5e7eb',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#2A2A3E',
+    shadowColor: '#10b981',
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
+    color: '#E5E5F0',
   },
   errorText: {
     marginTop: 4,
     fontSize: 12,
-    color: '#ef4444',
+    color: '#F87171',
   },
   bottomSheet: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#151520',
     paddingHorizontal: 16,
     paddingTop: 14,
     paddingBottom: 24,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     borderTopWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#2A2A3E',
     maxHeight: 400,
     shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
     shadowOffset: { width: 0, height: -5 },
-    elevation: 10,
+    elevation: 20,
   },
   bottomSheetCollapsed: {
     maxHeight: 60,
@@ -501,11 +507,11 @@ const styles = StyleSheet.create({
   sheetTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111827',
+    color: '#E5E5F0',
   },
   sheetSubtitle: {
     fontSize: 12,
-    color: '#6b7280',
+    color: '#9CA3AF',
     marginTop: 2,
   },
   refreshButton: {
@@ -518,25 +524,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   emptyText: {
-    color: '#6b7280',
+    color: '#9CA3AF',
   },
   itemCard: {
     width: 180,
     marginRight: 10,
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
+    backgroundColor: '#1A1A2E',
+    borderRadius: 16,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#2A2A3E',
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
   itemTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    color: '#E5E5F0',
   },
   itemRestaurant: {
     fontSize: 12,
-    color: '#6b7280',
+    color: '#9CA3AF',
     marginVertical: 4,
   },
   itemPrice: {
@@ -546,27 +557,29 @@ const styles = StyleSheet.create({
   },
   itemExpiry: {
     fontSize: 12,
-    color: '#ef4444',
+    color: '#F87171',
     marginTop: 4,
   },
   disabledCard: {
-    opacity: 0.6,
+    opacity: 0.5,
   },
   callout: {
     width: 220,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1A1A2E',
     borderRadius: 10,
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: '#2A2A3E',
   },
   calloutImage: {
     width: '100%',
     height: 80,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: '#2A2A3E',
   },
   calloutContent: {
     padding: 10,
@@ -574,12 +587,12 @@ const styles = StyleSheet.create({
   calloutTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#111827',
+    color: '#E5E5F0',
     marginBottom: 4,
   },
   calloutDescription: {
     fontSize: 11,
-    color: '#6b7280',
+    color: '#9CA3AF',
     marginBottom: 6,
     lineHeight: 14,
   },
@@ -591,7 +604,7 @@ const styles = StyleSheet.create({
   },
   calloutRestaurant: {
     fontSize: 11,
-    color: '#6b7280',
+    color: '#9CA3AF',
   },
   calloutPriceRow: {
     flexDirection: 'row',
@@ -606,7 +619,7 @@ const styles = StyleSheet.create({
   },
   calloutOriginalPrice: {
     fontSize: 10,
-    color: '#9ca3af',
+    color: '#6B7280',
     textDecorationLine: 'line-through',
   },
   calloutDiscountPrice: {
@@ -641,12 +654,12 @@ const styles = StyleSheet.create({
   },
   calloutTimeText: {
     fontSize: 10,
-    color: '#ef4444',
+    color: '#F87171',
     fontWeight: '600',
   },
   calloutQuantity: {
     fontSize: 10,
-    color: '#6b7280',
+    color: '#9CA3AF',
   },
   calloutOrderButton: {
     backgroundColor: '#10b981',
@@ -665,7 +678,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   calloutInfoBox: {
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#2A2A3E',
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 5,
@@ -673,20 +686,22 @@ const styles = StyleSheet.create({
   },
   calloutInfoText: {
     fontSize: 11,
-    color: '#6b7280',
+    color: '#9CA3AF',
     textAlign: 'center',
     fontWeight: '500',
   },
   calloutUnavailableBox: {
-    backgroundColor: '#fee2e2',
+    backgroundColor: '#2A1A1A',
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 5,
     marginTop: 2,
+    borderWidth: 1,
+    borderColor: '#F87171',
   },
   calloutUnavailableText: {
     fontSize: 11,
-    color: '#dc2626',
+    color: '#F87171',
     textAlign: 'center',
     fontWeight: '600',
   },
@@ -700,7 +715,7 @@ const styles = StyleSheet.create({
   },
   filterLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    color: '#9CA3AF',
     marginBottom: 4,
   },
   chipRow: {
@@ -713,20 +728,20 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
-    backgroundColor: '#ffffff',
+    borderColor: '#2A2A3E',
+    backgroundColor: '#1A1A2E',
   },
   chipActive: {
-    backgroundColor: '#e0f2fe',
-    borderColor: '#38bdf8',
+    backgroundColor: '#10b981',
+    borderColor: '#10b981',
   },
   chipText: {
     fontSize: 12,
-    color: '#4b5563',
+    color: '#9CA3AF',
   },
   chipTextActive: {
     fontSize: 12,
-    color: '#0369a1',
+    color: '#FFFFFF',
     fontWeight: '600',
   },
 });

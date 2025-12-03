@@ -7,7 +7,7 @@ export default function AppEntry() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' }}>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0A0A0F' }}>
         <ActivityIndicator size="large" color="#10b981" />
       </View>
     );

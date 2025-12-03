@@ -92,7 +92,7 @@ export default function SignUpScreen() {
           <MaterialCommunityIcons
             name="arrow-left"
             size={28}
-            color="#333"
+            color="#E5E5F0"
             onPress={() => router.back()}
           />
         </View>
@@ -138,8 +138,10 @@ export default function SignUpScreen() {
               mode="outlined"
               left={<TextInput.Icon icon="account-outline" />}
               value={fullName}
-              outlineColor="#e5e7eb"
-              activeOutlineColor="#333"
+              outlineColor="#2A2A3E"
+              activeOutlineColor="#1B7F5F"
+              style={{ backgroundColor: '#1A1A2E' }}
+              textColor="#E5E5F0"
               onChangeText={(t) => {
                 setFullName(t);
                 setLocalError('');
@@ -151,8 +153,10 @@ export default function SignUpScreen() {
               label="Email *"
               mode="outlined"
               left={<TextInput.Icon icon="email-outline" />}
-              outlineColor="#e5e7eb"
-              activeOutlineColor="#333"
+              outlineColor="#2A2A3E"
+              activeOutlineColor="#1B7F5F"
+              style={{ backgroundColor: '#1A1A2E' }}
+              textColor="#E5E5F0"
               value={email}
               onChangeText={(t) => {
                 setEmail(t);
@@ -165,8 +169,10 @@ export default function SignUpScreen() {
             <TextInput
               label="Телефон (необов'язково)"
               mode="outlined" 
-              outlineColor="#e5e7eb"
-              activeOutlineColor="#333"
+              outlineColor="#2A2A3E"
+              activeOutlineColor="#1B7F5F"
+              style={{ backgroundColor: '#1A1A2E' }}
+              textColor="#E5E5F0"
               left={<TextInput.Icon icon="phone-outline" />}
               value={phone}
               onChangeText={(t) => {
@@ -182,8 +188,10 @@ export default function SignUpScreen() {
               left={<TextInput.Icon icon="lock-outline" />}
               secureTextEntry
               value={password}    
-              outlineColor="#e5e7eb"
-              activeOutlineColor="#333"
+              outlineColor="#2A2A3E"
+              activeOutlineColor="#1B7F5F"
+              style={{ backgroundColor: '#1A1A2E' }}
+              textColor="#E5E5F0"
               onChangeText={(t) => {
                 setPassword(t);
                 setLocalError('');
@@ -195,7 +203,7 @@ export default function SignUpScreen() {
               onPress={handleSignUp}
               disabled={authLoading}
               style={styles.button}
-              contentStyle={{ paddingVertical: 10 }}
+              contentStyle={{ paddingVertical: 8 }}
             >
               {authLoading ? (
                 <ActivityIndicator animating color="#fff" />
@@ -207,8 +215,8 @@ export default function SignUpScreen() {
             <Button
               onPress={() => router.push('/(auth)/signin')}
               disabled={authLoading}
-              textColor="#10b981"
-              style={{ marginTop: 12 }}
+              textColor="#1B7F5F"
+              style={{ marginTop: 0 }}
             >
               Вже є акаунт? Увійти
             </Button>
@@ -220,7 +228,7 @@ export default function SignUpScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#0A0A0F' },
 
   scrollView: { flex: 1 },
 
@@ -240,10 +248,11 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: 'bold',
     marginBottom: 8,
+    color: '#E5E5F0',
   },
 
   subtitle: {
-    color: '#6B7280',
+    color: '#9CA3AF',
     marginBottom: 32,
   },
 
@@ -252,15 +261,20 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    marginTop: 16,
-    borderRadius: 12,
-    backgroundColor: '#10b981',
+    marginTop: 160,
+    borderRadius: 16,
+    backgroundColor: '#1B7F5F',
+    shadowColor: '#1B7F5F',
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
   },
 
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEE2E2',
+    backgroundColor: '#2A1A1A',
     borderLeftWidth: 4,
     borderLeftColor: '#EF4444',
     padding: 10,
@@ -269,7 +283,7 @@ const styles = StyleSheet.create({
   },
 
   errorText: {
-    color: '#EF4444',
+    color: '#F87171',
     flex: 1,
     fontSize: 13,
   },

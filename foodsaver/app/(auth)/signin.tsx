@@ -56,7 +56,7 @@ export default function SignInScreen() {
         <MaterialCommunityIcons
           name="arrow-left"
           size={28}
-          color="#111827"
+          color="#E5E5F0"
           onPress={() => router.back()}
         />
       </View>
@@ -101,9 +101,10 @@ export default function SignInScreen() {
             keyboardType="email-address"
             autoCapitalize="none"
             editable={!authLoading}
-            outlineColor="#e5e7eb"
-            activeOutlineColor="#333" 
-            textColor="#111827"
+            outlineColor="#2A2A3E"
+            activeOutlineColor="#1B7F5F" 
+            textColor="#E5E5F0"
+            style={{ backgroundColor: '#1A1A2E' }}
           />
           <HelperText type="error" visible={!!localError && !validateEmail(email)}>
             {email && !validateEmail(email) ? 'Некоректний email' : ''}
@@ -126,9 +127,10 @@ export default function SignInScreen() {
                 onPress={() => setShowPassword(!showPassword)}
               />
             }
-            outlineColor="#e5e7eb"
-            activeOutlineColor="#333"
-            textColor="#111827"
+            outlineColor="#2A2A3E"
+            activeOutlineColor="#1B7F5F" 
+            textColor="#E5E5F0"
+            style={{ backgroundColor: '#1A1A2E' }}
           />
 
           <Button
@@ -137,7 +139,7 @@ export default function SignInScreen() {
             disabled={authLoading}
             style={styles.button}
             contentStyle={{ paddingVertical: 8 }}
-            buttonColor="#10b981"
+            buttonColor="#1B7F5F"
             textColor="#fff"
           >
             {authLoading ? (
@@ -151,7 +153,7 @@ export default function SignInScreen() {
             onPress={() => router.push('/(auth)/signup')}
             disabled={authLoading}
             style={{ marginTop: 12 }}
-            textColor="#10b981"
+            textColor="#1B7F5F"
           >
             Немає акаунту? Зареєструватися
           </Button>
@@ -164,7 +166,7 @@ export default function SignInScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#0A0A0F',
   },
   header: {
     position: 'absolute',
@@ -180,27 +182,28 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#111827',
+    color: '#E5E5F0',
   },
   subtitle: {
-    color: '#6B7280',
+    color: '#9CA3AF',
     marginBottom: 32,
   },
   form: {
     gap: 0,
   },
   button: {
-    marginTop: 24,
-    borderRadius: 12,
-    shadowColor: '#10b981',
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
+    marginTop: 310,
+    borderRadius: 16,
+    shadowColor: '#1B7F5F',
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
   },
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEE2E2',
+    backgroundColor: '#2A1A1A',
     borderLeftWidth: 4,
     borderLeftColor: '#EF4444',
     padding: 10,
@@ -208,7 +211,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   errorText: {
-    color: '#EF4444',
+    color: '#F87171',
     flex: 1,
     fontSize: 13,
   },

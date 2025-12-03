@@ -400,25 +400,25 @@ export default function StatsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#0A0A0F',
   },
   header: {
     paddingTop: 52,
     paddingBottom: 12,
     paddingHorizontal: 20,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e5e7eb',
-    backgroundColor: '#ffffff',
+    borderBottomColor: '#2A2A3E',
+    backgroundColor: '#151520',
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#111827',
+    color: '#E5E5F0',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#9CA3AF',
   },
   content: {
     flex: 1,
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111827',
+    color: '#E5E5F0',
   },
   periodSelector: {
     flexDirection: 'row',
@@ -448,18 +448,19 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#2A2A3E',
+    backgroundColor: '#1A1A2E',
   },
   periodChipActive: {
-    backgroundColor: '#ecfdf5',
-    borderColor: '#10b981',
+    backgroundColor: '#1B7F5F',
+    borderColor: '#1B7F5F',
   },
   periodChipText: {
     fontSize: 12,
-    color: '#6b7280',
+    color: '#9CA3AF',
   },
   periodChipTextActive: {
-    color: '#047857',
+    color: '#FFFFFF',
     fontWeight: '600',
   },
   loadingStats: {
@@ -470,23 +471,25 @@ const styles = StyleSheet.create({
   },
   loadingStatsText: {
     fontSize: 13,
-    color: '#6b7280',
+    color: '#9CA3AF',
   },
   errorCard: {
     marginTop: 8,
     padding: 12,
     borderRadius: 8,
-    backgroundColor: '#fee2e2',
+    backgroundColor: '#2A1A1A',
+    borderWidth: 1,
+    borderColor: '#F87171',
   },
   errorTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#b91c1c',
+    color: '#F87171',
     marginBottom: 2,
   },
   errorDescription: {
     fontSize: 13,
-    color: '#991b1b',
+    color: '#F87171',
   },
   summaryGrid: {
     flexDirection: 'row',
@@ -496,34 +499,34 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     flexBasis: '48%',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1A1A2E',
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#2A2A3E',
   },
   summaryLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    color: '#9CA3AF',
     marginBottom: 4,
   },
   summaryValue: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111827',
+    color: '#E5E5F0',
   },
   chartCard: {
     marginTop: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1A1A2E',
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#2A2A3E',
   },
   chartTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#111827',
+    color: '#E5E5F0',
     marginBottom: 8,
   },
   chartRow: {
@@ -536,28 +539,28 @@ const styles = StyleSheet.create({
   },
   chartLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    color: '#9CA3AF',
   },
   chartValue: {
     fontSize: 12,
-    color: '#111827',
+    color: '#E5E5F0',
     fontWeight: '600',
   },
   chartBarBackground: {
     height: 8,
     borderRadius: 999,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: '#2A2A3E',
     overflow: 'hidden',
   },
   chartBarFill: {
     height: 8,
     borderRadius: 999,
-    backgroundColor: '#10b981',
+    backgroundColor: '#1B7F5F',
   },
   chartBarFillMoneySaved: {
     height: 8,
     borderRadius: 999,
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#06B6D4',
   },
   ordersChartContainer: {
     flexDirection: 'row',
@@ -580,20 +583,20 @@ const styles = StyleSheet.create({
   },
   ordersChartBar: {
     width: '100%',
-    backgroundColor: '#8b5cf6',
+    backgroundColor: '#8B5CF6',
     borderRadius: 4,
     minHeight: 8,
   },
   ordersChartLabel: {
     fontSize: 10,
-    color: '#6b7280',
+    color: '#9CA3AF',
     marginTop: 4,
     textAlign: 'center',
   },
   ordersChartValue: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#111827',
+    color: '#E5E5F0',
     marginTop: 2,
   },
   comparisonRow: {
@@ -602,7 +605,7 @@ const styles = StyleSheet.create({
   comparisonLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#111827',
+    color: '#E5E5F0',
     marginBottom: 8,
   },
   comparisonBars: {
@@ -618,12 +621,12 @@ const styles = StyleSheet.create({
   },
   comparisonBarLabelText: {
     fontSize: 11,
-    color: '#6b7280',
+    color: '#9CA3AF',
   },
   comparisonBarValue: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#111827',
+    color: '#E5E5F0',
   },
   mockDataToggle: {
     marginTop: 20,
@@ -633,40 +636,40 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 8,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#1A1A2E',
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#2A2A3E',
     alignItems: 'center',
   },
   mockToggleButtonActive: {
-    backgroundColor: '#ecfdf5',
-    borderColor: '#10b981',
+    backgroundColor: '#1B7F5F',
+    borderColor: '#1B7F5F',
   },
   mockToggleText: {
     fontSize: 13,
-    color: '#6b7280',
+    color: '#9CA3AF',
   },
   mockToggleTextActive: {
-    color: '#047857',
+    color: '#FFFFFF',
     fontWeight: '600',
   },
   infoCard: {
-    backgroundColor: '#ecfeff',
+    backgroundColor: '#1A2A3E',
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#bae6fd',
+    borderColor: '#06B6D4',
     margin: 20,
   },
   infoTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#0f172a',
+    color: '#E5E5F0',
     marginBottom: 4,
   },
   infoText: {
     fontSize: 13,
-    color: '#1e293b',
+    color: '#9CA3AF',
     marginBottom: 8,
   },
   infoButton: {
@@ -674,7 +677,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
-    backgroundColor: '#0ea5e9',
+    backgroundColor: '#06B6D4',
   },
   infoButtonText: {
     fontSize: 13,
@@ -686,7 +689,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#0A0A0F',
   },
 });
 

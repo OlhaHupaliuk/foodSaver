@@ -364,7 +364,7 @@
                         Кількість: {item.quantity}
                       </Text>
                       <Text style={styles.itemExpiry}>
-                        <Clock size={12} color="#ef4444" /> {getTimeUntilExpiry(item.expiryTime)}
+                        <Clock size={12} color="#9CA3AF" /> {getTimeUntilExpiry(item.expiryTime)}
                       </Text>
                     </View>
                   </View>
@@ -373,7 +373,7 @@
                     style={styles.deleteButton}
                     onPress={() => handleDeleteItem(item.id)}
                   >
-                    <Trash2 size={16} color="#ef4444" />
+                    <Trash2 size={16} color="#FF4D6D" />
                     <Text style={styles.deleteButtonText}>Видалити</Text>
                   </TouchableOpacity>
                 </View>
@@ -397,7 +397,7 @@
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>Додати пропозицію</Text>
                 <TouchableOpacity onPress={() => setShowAddModal(false)}>
-                  <X size={24} color="#6b7280" />
+                  <X size={24} color="#9CA3AF" />
                 </TouchableOpacity>
               </View>
 
@@ -466,9 +466,6 @@
                       </Text>
                     </TouchableOpacity>
                   </View>
-                  <Text style={styles.imageHint}>
-                    Ви можете обрати фото з галереї. За потреби можна буде додати підтримку завантаження на сервер.
-                  </Text>
                 </View>
 
                 <TextInput
@@ -550,15 +547,15 @@
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#f9fafb',
+      backgroundColor: '#0A0A0F',
     },
     header: {
-      backgroundColor: '#ffffff',
+      backgroundColor: '#151520',
       paddingTop: 60,
       paddingBottom: 16,
       paddingHorizontal: 20,
       borderBottomWidth: 1,
-      borderBottomColor: '#e5e7eb',
+      borderBottomColor: '#2A2A3E',
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
@@ -570,16 +567,16 @@
     },
     headerSubtitle: {
       fontSize: 13,
-      color: '#6b7280',
+      color: '#9CA3AF',
       marginTop: 2,
     },
     title: {
       fontSize: 28,
       fontWeight: 'bold',
-      color: '#111827',
+      color: '#E5E5F0',
     },
     addButton: {
-      backgroundColor: '#10b981',
+      backgroundColor: '#1B7F5F',
       width: 48,
       height: 48,
       borderRadius: 24,
@@ -596,7 +593,7 @@
       paddingVertical: 6,
       borderRadius: 999,
       borderWidth: 1,
-      borderColor: '#e5e7eb',
+      borderColor: '#2A2A3E',
       marginRight: 4,
     },
     refreshHeaderText: {
@@ -615,7 +612,7 @@
     },
     loadingText: {
       fontSize: 14,
-      color: '#6b7280',
+      color: '#9CA3AF',
       marginTop: 12,
     },
     emptyState: {
@@ -626,12 +623,12 @@
     },
     emptyText: {
       fontSize: 16,
-      color: '#6b7280',
+      color: '#9CA3AF',
       textAlign: 'center',
       marginTop: 12,
     },
     statsCard: {
-      backgroundColor: '#10b981',
+      backgroundColor: '#1B7F5F',
       borderRadius: 12,
       padding: 20,
       marginBottom: 20,
@@ -664,17 +661,17 @@
     emptyListText: {
       fontSize: 18,
       fontWeight: '600',
-      color: '#6b7280',
+      color: '#9CA3AF',
       marginBottom: 8,
       marginTop: 16,
     },
     emptyListSubtext: {
       fontSize: 14,
-      color: '#9ca3af',
+      color: '#9CA3AF',
       textAlign: 'center',
     },
     itemCard: {
-      backgroundColor: '#ffffff',
+      backgroundColor: '#1A1A2E',
       borderRadius: 12,
       padding: 16,
       marginBottom: 12,
@@ -694,11 +691,11 @@
     itemTitle: {
       fontSize: 18,
       fontWeight: '600',
-      color: '#111827',
+      color: '#E5E5F0',
     },
     itemDescription: {
       fontSize: 14,
-      color: '#6b7280',
+      color: '#9CA3AF',
       marginBottom: 8,
       lineHeight: 20,
     },
@@ -709,7 +706,7 @@
       fontStyle: 'italic',
     },
     statusBadge: {
-      backgroundColor: '#10b981',
+      backgroundColor: '#1B7F5F',
       paddingHorizontal: 12,
       paddingVertical: 6,
       borderRadius: 6,
@@ -741,7 +738,7 @@
       textDecorationLine: 'line-through',
     },
     discountBadge: {
-      backgroundColor: '#ef4444',
+      backgroundColor: '#FF4D6D',
       paddingHorizontal: 8,
       paddingVertical: 4,
       borderRadius: 6,
@@ -758,11 +755,11 @@
     },
     itemQuantity: {
       fontSize: 14,
-      color: '#6b7280',
+      color: '#9CA3AF',
     },
     itemExpiry: {
       fontSize: 14,
-      color: '#ef4444',
+      color: '#9CA3AF',
       fontWeight: '500',
     },
     deleteButton: {
@@ -770,23 +767,24 @@
       alignItems: 'center',
       justifyContent: 'center',
       marginTop: 12,
-      paddingVertical: 8,
+      paddingTop: 12,
       borderTopWidth: 1,
-      borderTopColor: '#e5e7eb',
+      borderTopColor: '#2A2A3E',
       gap: 6,
     },
     deleteButtonText: {
       fontSize: 14,
       fontWeight: '600',
-      color: '#ef4444',
+      color: '#FF4D6D',
+      marginTop: 0,
     },
     modalOverlay: {
       flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
       justifyContent: 'flex-end',
     },
     modalContent: {
-      backgroundColor: '#ffffff',
+      backgroundColor: '#151520',
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
       maxHeight: '90%',
@@ -797,24 +795,24 @@
       alignItems: 'center',
       padding: 20,
       borderBottomWidth: 1,
-      borderBottomColor: '#e5e7eb',
+      borderBottomColor: '#2A2A3E',
     },
     modalTitle: {
       fontSize: 20,
       fontWeight: '700',
-      color: '#111827',
+      color: '#E5E5F0',
     },
     modalForm: {
       padding: 20,
     },
     modalInput: {
-      backgroundColor: '#f9fafb',
+      backgroundColor: '#1A1A2E',
       borderRadius: 12,
       borderWidth: 1,
-      borderColor: '#e5e7eb',
+      borderColor: '#2A2A3E',
       padding: 16,
       fontSize: 16,
-      color: '#111827',
+      color: '#E5E5F0',
       marginBottom: 16,
     },
     modalInputMultiline: {
@@ -824,11 +822,13 @@
     discountPreview: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: '#d1fae5',
+      backgroundColor: '#2A1A3E',
       padding: 12,
       borderRadius: 8,
       marginBottom: 16,
       gap: 8,
+      borderWidth: 1,
+      borderColor: '#1B7F5F',
     },
     discountPreviewText: {
       fontSize: 14,
@@ -836,7 +836,12 @@
       color: '#10b981',
     },
     modalButton: {
-      backgroundColor: '#10b981',
+      backgroundColor: '#1B7F5F',
+      shadowColor: '#1B7F5F',
+      shadowOpacity: 0.5,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 8,
       borderRadius: 12,
       padding: 16,
       alignItems: 'center',
@@ -851,8 +856,7 @@
       color: '#ffffff',
     },
     modalCancelButton: {
-      backgroundColor: '#f9fafb',
-      borderRadius: 12,
+      borderRadius: 16,
       padding: 16,
       alignItems: 'center',
       marginTop: 12,
@@ -861,7 +865,7 @@
     modalCancelButtonText: {
       fontSize: 16,
       fontWeight: '600',
-      color: '#6b7280',
+      color: '#9CA3AF',
     },
     imageSection: {
       marginBottom: 16,
@@ -869,12 +873,12 @@
     imageLabel: {
       fontSize: 14,
       fontWeight: '600',
-      color: '#111827',
+      color: '#E5E5F0',
       marginBottom: 8,
     },
     imageHint: {
       fontSize: 12,
-      color: '#9ca3af',
+      color: '#9CA3AF',
       marginTop: 4,
       fontStyle: 'italic',
     },
@@ -883,7 +887,7 @@
       borderRadius: 12,
       overflow: 'hidden',
       borderWidth: 1,
-      borderColor: '#e5e7eb',
+      borderColor: '#2A2A3E',
     },
     imagePreview: {
       width: '100%',
@@ -894,7 +898,7 @@
       position: 'absolute',
       top: 8,
       right: 8,
-      backgroundColor: '#ef4444',
+      backgroundColor: '#FF4D6D',
       borderRadius: 20,
       width: 32,
       height: 32,
@@ -911,7 +915,7 @@
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
-      backgroundColor: '#10b981',
+      backgroundColor: '#1B7F5F',
       paddingHorizontal: 14,
       paddingVertical: 10,
       borderRadius: 999,

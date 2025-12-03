@@ -91,7 +91,7 @@ export default function HomeScreen() {
                   <View style={styles.foodInfo}>
                     <Text style={styles.foodTitle}>{item.title}</Text>
                     <View style={styles.restaurantInfo}>
-                      <MapPin size={14} color="#6b7280" />
+                      <MapPin size={14} color="#9CA3AF" />
                       <Text style={styles.restaurantName}>
                         {typeof item.restaurant !== 'string' ? item.restaurant?.name : ''}
                       </Text>
@@ -102,7 +102,7 @@ export default function HomeScreen() {
                         <Text style={styles.discountPrice}>{formatPrice(item.discountedPrice)}</Text>
                       </View>
                       <View style={styles.timeContainer}>
-                        <Clock size={14} color="#ef4444" />
+                        <Clock size={14} color="#F87171" />
                         <Text style={styles.timeText}>{getTimeUntilExpiry(item.expiryTime)}</Text>
                       </View>
                     </View>
@@ -128,15 +128,15 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#0A0A0F',
   },
   header: {
     paddingTop: 52,
     paddingBottom: 16,
     paddingHorizontal: 20,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e5e7eb',
-    backgroundColor: '#ffffff',
+    borderBottomColor: '#2A2A3E',
+    backgroundColor: '#151520',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -144,12 +144,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#111827',
+    color: '#E5E5F0',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    color: '#9CA3AF',
   },
   content: {
     flex: 1,
@@ -161,15 +161,19 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111827',
+    color: '#E5E5F0',
     marginBottom: 12,
   },
   actionCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
+    backgroundColor: '#1A1A2E',
+    borderRadius: 16,
     padding: 18,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#2A2A3E',
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
   actionTitle: {
     fontSize: 18,
@@ -179,7 +183,7 @@ const styles = StyleSheet.create({
   },
   actionSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#9CA3AF',
   },
   foodList: {
     paddingHorizontal: 20,
@@ -192,17 +196,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   foodCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
+    backgroundColor: '#1A1A2E',
+    borderRadius: 16,
     marginBottom: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#2A2A3E',
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
   foodImage: {
     width: '100%',
     height: 160,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: '#2A2A3E',
   },
   foodInfo: {
     padding: 16,
@@ -210,7 +219,7 @@ const styles = StyleSheet.create({
   foodTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
+    color: '#E5E5F0',
     marginBottom: 8,
   },
   restaurantInfo: {
@@ -220,7 +229,7 @@ const styles = StyleSheet.create({
   },
   restaurantName: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#9CA3AF',
     marginLeft: 4,
   },
   priceRow: {
@@ -235,7 +244,7 @@ const styles = StyleSheet.create({
   },
   originalPrice: {
     fontSize: 14,
-    color: '#9ca3af',
+    color: '#6B7280',
     textDecorationLine: 'line-through',
   },
   discountPrice: {
@@ -252,7 +261,7 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: 12,
-    color: '#ef4444',
+    color: '#F87171',
     marginLeft: 4,
     fontWeight: '600',
   },
@@ -267,6 +276,11 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 6,
     gap: 4,
+    shadowColor: '#f97316',
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
   },
   discountText: {
     fontSize: 12,
@@ -274,7 +288,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   disabledCard: {
-    opacity: 0.6,
+    opacity: 0.5,
   },
   emptyState: {
     paddingVertical: 32,
@@ -283,12 +297,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    color: '#E5E5F0',
     marginBottom: 6,
   },
   emptySubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#9CA3AF',
     lineHeight: 20,
   },
 });
