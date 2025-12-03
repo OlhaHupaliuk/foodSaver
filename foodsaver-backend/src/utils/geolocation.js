@@ -48,7 +48,7 @@ const axios = require("axios");
  * https://goo.gl/maps/ABC123
  * https://www.google.com/maps/place/50.4501,30.5234
  */
-const extractCoordinatesFromMapsLink = (mapsLink) => {
+const extractCoordinatesFromMapsLink = async (mapsLink) => {
   try {
     // Паттерн для координат у посиланні
     const coordPattern = /(?:q=|place\/)(-?\d+\.?\d*),(-?\d+\.?\d*)/;
@@ -66,6 +66,41 @@ const extractCoordinatesFromMapsLink = (mapsLink) => {
         longitude <= 180
       ) {
         return [longitude, latitude]; // MongoDB формат: [longitude, latitude]
+      }
+    }
+
+    // If URL contains an address instead of coordinates, fallback to Nominatim (OpenStreetMap)
+    if (!match && hasAddress) {
+      const address = decodeURIComponent(finalUrl.split("q=")[1].split("&")[0]);
+
+      console.log(`🌍 Falling back to OSM geocoding for address: ${address}`);
+
+      try {
+        const osmRes = await axios.get(
+          "https://nominatim.openstreetmap.org/search",
+          {
+            params: {
+              q: address,
+              format: "json",
+              limit: 1,
+            },
+            headers: {
+              "User-Agent": "FoodSaver/1.0",
+            },
+          }
+        );
+
+        if (osmRes.data && osmRes.data.length > 0) {
+          const lat = parseFloat(osmRes.data[0].lat);
+          const lon = parseFloat(osmRes.data[0].lon);
+
+          console.log(`✅ OSM resolved address to coords: [${lon}, ${lat}]`);
+          return [lon, lat];
+        } else {
+          console.warn(`⚠️ OSM could not geocode this address.`);
+        }
+      } catch (err) {
+        console.warn(`❌ OSM geocoding failed: ${err.message}`);
       }
     }
 
