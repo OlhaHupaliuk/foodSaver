@@ -16,6 +16,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { router } from 'expo-router';
 import { useAuth } from '../../hooks/useAuth';
 import { AuthErrorType } from '../../types/auth';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function SignUpScreen() {
   const [email, setEmail] = useState('');
@@ -25,6 +26,7 @@ export default function SignUpScreen() {
   const [localError, setLocalError] = useState('');
 
   const { signUp, loading: authLoading, error: authError, clearError } = useAuth();
+  const { theme } = useTheme();
 
   const validateEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -79,7 +81,7 @@ export default function SignUpScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
@@ -92,16 +94,16 @@ export default function SignUpScreen() {
           <MaterialCommunityIcons
             name="arrow-left"
             size={28}
-            color="#E5E5F0"
+            color={theme.colors.text}
             onPress={() => router.back()}
           />
         </View>
 
         <View style={styles.content}>
-          <Text variant="headlineLarge" style={styles.title}>
+          <Text variant="headlineLarge" style={[styles.title, { color: theme.colors.text }]}>
             Реєстрація
           </Text>
-          <Text variant="bodyLarge" style={styles.subtitle}>
+          <Text variant="bodyLarge" style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
             Створіть новий акаунт
           </Text>
 
@@ -110,6 +112,7 @@ export default function SignUpScreen() {
             <View
               style={[
                 styles.errorContainer,
+                { backgroundColor: theme.colors.errorBackground, borderLeftColor: theme.colors.error },
                 isNetworkError && {
                   backgroundColor: '#FEF3C7',
                   borderLeftColor: '#F59E0B',
@@ -119,14 +122,14 @@ export default function SignUpScreen() {
               <MaterialCommunityIcons
                 name={isNetworkError ? 'wifi-off' : 'alert-circle-outline'}
                 size={20}
-                color="#EF4444"
+                color={theme.colors.error}
                 style={{ marginRight: 8 }}
               />
-              <Text style={styles.errorText}>{errorMessage}</Text>
+              <Text style={[styles.errorText, { color: theme.colors.errorLight }]}>{errorMessage}</Text>
               <MaterialCommunityIcons
                 name="close"
                 size={20}
-                color="#EF4444"
+                color={theme.colors.error}
                 onPress={clearError}
               />
             </View>
@@ -138,10 +141,10 @@ export default function SignUpScreen() {
               mode="outlined"
               left={<TextInput.Icon icon="account-outline" />}
               value={fullName}
-              outlineColor="#2A2A3E"
-              activeOutlineColor="#1B7F5F"
-              style={{ backgroundColor: '#1A1A2E' }}
-              textColor="#E5E5F0"
+              outlineColor={theme.colors.border}
+              activeOutlineColor={theme.colors.primary}
+              style={{ backgroundColor: theme.colors.surfaceSecondary }}
+              textColor={theme.colors.text}
               onChangeText={(t) => {
                 setFullName(t);
                 setLocalError('');
@@ -153,10 +156,10 @@ export default function SignUpScreen() {
               label="Email *"
               mode="outlined"
               left={<TextInput.Icon icon="email-outline" />}
-              outlineColor="#2A2A3E"
-              activeOutlineColor="#1B7F5F"
-              style={{ backgroundColor: '#1A1A2E' }}
-              textColor="#E5E5F0"
+              outlineColor={theme.colors.border}
+              activeOutlineColor={theme.colors.primary}
+              style={{ backgroundColor: theme.colors.surfaceSecondary }}
+              textColor={theme.colors.text}
               value={email}
               onChangeText={(t) => {
                 setEmail(t);
@@ -169,10 +172,10 @@ export default function SignUpScreen() {
             <TextInput
               label="Телефон (необов'язково)"
               mode="outlined" 
-              outlineColor="#2A2A3E"
-              activeOutlineColor="#1B7F5F"
-              style={{ backgroundColor: '#1A1A2E' }}
-              textColor="#E5E5F0"
+              outlineColor={theme.colors.border}
+              activeOutlineColor={theme.colors.primary}
+              style={{ backgroundColor: theme.colors.surfaceSecondary }}
+              textColor={theme.colors.text}
               left={<TextInput.Icon icon="phone-outline" />}
               value={phone}
               onChangeText={(t) => {
@@ -188,10 +191,10 @@ export default function SignUpScreen() {
               left={<TextInput.Icon icon="lock-outline" />}
               secureTextEntry
               value={password}    
-              outlineColor="#2A2A3E"
-              activeOutlineColor="#1B7F5F"
-              style={{ backgroundColor: '#1A1A2E' }}
-              textColor="#E5E5F0"
+              outlineColor={theme.colors.border}
+              activeOutlineColor={theme.colors.primary}
+              style={{ backgroundColor: theme.colors.surfaceSecondary }}
+              textColor={theme.colors.text}
               onChangeText={(t) => {
                 setPassword(t);
                 setLocalError('');
@@ -202,7 +205,7 @@ export default function SignUpScreen() {
               mode="contained"
               onPress={handleSignUp}
               disabled={authLoading}
-              style={styles.button}
+              style={[styles.button, { backgroundColor: theme.colors.primary, shadowColor: theme.colors.shadowPrimary }]}
               contentStyle={{ paddingVertical: 8 }}
             >
               {authLoading ? (
@@ -215,7 +218,7 @@ export default function SignUpScreen() {
             <Button
               onPress={() => router.push('/(auth)/signin')}
               disabled={authLoading}
-              textColor="#1B7F5F"
+              textColor={theme.colors.primary}
               style={{ marginTop: 0 }}
             >
               Вже є акаунт? Увійти
@@ -228,7 +231,7 @@ export default function SignUpScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
+  container: { flex: 1 },
 
   scrollView: { flex: 1 },
 
@@ -248,11 +251,9 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#E5E5F0',
   },
 
   subtitle: {
-    color: '#9CA3AF',
     marginBottom: 32,
   },
 
@@ -263,8 +264,6 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 160,
     borderRadius: 16,
-    backgroundColor: '#1B7F5F',
-    shadowColor: '#1B7F5F',
     shadowOpacity: 0.4,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
@@ -274,16 +273,13 @@ const styles = StyleSheet.create({
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2A1A1A',
     borderLeftWidth: 4,
-    borderLeftColor: '#EF4444',
     padding: 10,
     borderRadius: 8,
     marginBottom: 16,
   },
 
   errorText: {
-    color: '#F87171',
     flex: 1,
     fontSize: 13,
   },

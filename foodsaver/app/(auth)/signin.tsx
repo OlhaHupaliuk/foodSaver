@@ -5,6 +5,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { router } from 'expo-router';
 import { useAuth } from '../../hooks/useAuth';
 import { AuthErrorType } from '../../types/auth';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function SignInScreen() {
   const [email, setEmail] = useState('');
@@ -13,6 +14,7 @@ export default function SignInScreen() {
   const [localError, setLocalError] = useState('');
 
   const { signIn, loading: authLoading, error: authError, clearError } = useAuth();
+  const { theme } = useTheme();
 
   useEffect(() => {
     return () => clearError();
@@ -51,38 +53,39 @@ export default function SignInScreen() {
   const isNetworkError = authError?.type === AuthErrorType.NETWORK_ERROR;
 
   return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
+    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]} keyboardShouldPersistTaps="handled">
       <View style={styles.header}>
         <MaterialCommunityIcons
           name="arrow-left"
           size={28}
-          color="#E5E5F0"
+          color={theme.colors.text}
           onPress={() => router.back()}
         />
       </View>
 
       <View style={styles.content}>
-        <Text variant="headlineLarge" style={styles.title}>Вхід</Text>
-        <Text variant="bodyLarge" style={styles.subtitle}>Ласкаво просимо назад!</Text>
+        <Text variant="headlineLarge" style={[styles.title, { color: theme.colors.text }]}>Вхід</Text>
+        <Text variant="bodyLarge" style={[styles.subtitle, { color: theme.colors.textSecondary }]}>Ласкаво просимо назад!</Text>
 
         {errorMessage ? (
           <View
             style={[
               styles.errorContainer,
+              { backgroundColor: theme.colors.errorBackground, borderLeftColor: theme.colors.error },
               isNetworkError && { backgroundColor: '#FEF3C7', borderLeftColor: '#F59E0B' },
             ]}
           >
             <MaterialCommunityIcons
               name={isNetworkError ? 'wifi-off' : 'alert-circle-outline'}
               size={20}
-              color="#EF4444"
+              color={theme.colors.error}
               style={{ marginRight: 8 }}
             />
-            <Text style={styles.errorText}>{errorMessage}</Text>
+            <Text style={[styles.errorText, { color: theme.colors.errorLight }]}>{errorMessage}</Text>
             <MaterialCommunityIcons
               name="close"
               size={20}
-              color="#EF4444"
+              color={theme.colors.error}
               onPress={clearError}
             />
           </View>
@@ -101,10 +104,10 @@ export default function SignInScreen() {
             keyboardType="email-address"
             autoCapitalize="none"
             editable={!authLoading}
-            outlineColor="#2A2A3E"
-            activeOutlineColor="#1B7F5F" 
-            textColor="#E5E5F0"
-            style={{ backgroundColor: '#1A1A2E' }}
+            outlineColor={theme.colors.border}
+            activeOutlineColor={theme.colors.primary} 
+            textColor={theme.colors.text}
+            style={{ backgroundColor: theme.colors.surfaceSecondary }}
           />
           <HelperText type="error" visible={!!localError && !validateEmail(email)}>
             {email && !validateEmail(email) ? 'Некоректний email' : ''}
@@ -127,10 +130,10 @@ export default function SignInScreen() {
                 onPress={() => setShowPassword(!showPassword)}
               />
             }
-            outlineColor="#2A2A3E"
-            activeOutlineColor="#1B7F5F" 
-            textColor="#E5E5F0"
-            style={{ backgroundColor: '#1A1A2E' }}
+            outlineColor={theme.colors.border}
+            activeOutlineColor={theme.colors.primary} 
+            textColor={theme.colors.text}
+            style={{ backgroundColor: theme.colors.surfaceSecondary }}
           />
 
           <Button
@@ -139,7 +142,7 @@ export default function SignInScreen() {
             disabled={authLoading}
             style={styles.button}
             contentStyle={{ paddingVertical: 8 }}
-            buttonColor="#1B7F5F"
+            buttonColor={theme.colors.primary}
             textColor="#fff"
           >
             {authLoading ? (
@@ -153,7 +156,7 @@ export default function SignInScreen() {
             onPress={() => router.push('/(auth)/signup')}
             disabled={authLoading}
             style={{ marginTop: 12 }}
-            textColor="#1B7F5F"
+            textColor={theme.colors.primary}
           >
             Немає акаунту? Зареєструватися
           </Button>
@@ -166,7 +169,6 @@ export default function SignInScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0F',
   },
   header: {
     position: 'absolute',
@@ -182,10 +184,8 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#E5E5F0',
   },
   subtitle: {
-    color: '#9CA3AF',
     marginBottom: 32,
   },
   form: {
@@ -194,7 +194,6 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 310,
     borderRadius: 16,
-    shadowColor: '#1B7F5F',
     shadowOpacity: 0.4,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
@@ -203,15 +202,12 @@ const styles = StyleSheet.create({
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2A1A1A',
     borderLeftWidth: 4,
-    borderLeftColor: '#EF4444',
     padding: 10,
     borderRadius: 8,
     marginBottom: 16,
   },
   errorText: {
-    color: '#F87171',
     flex: 1,
     fontSize: 13,
   },

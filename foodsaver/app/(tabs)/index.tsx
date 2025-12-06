@@ -8,9 +8,11 @@ import { useAuth } from '../../hooks/useAuth';
 import { api } from '../../services/api';
 import { FoodItem } from '../../types/auth';
 import { useOrderActions } from '../../hooks/useOrderActions';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function HomeScreen() {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
+  const { theme } = useTheme();
 
   const { user } = useAuth();
   const { orderingItemId, confirmAndPlaceOrder } = useOrderActions();
@@ -33,11 +35,11 @@ export default function HomeScreen() {
   const isRestaurant = user?.role === 'restaurant_owner';
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border }]}>
         <View>
-          <Text style={styles.title}>FoodSaver</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: theme.colors.text }]}>FoodSaver</Text>
+          <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
             {isRestaurant ? 'Керуйте залишками їжі' : 'Рятуйте їжу, економте гроші'}
           </Text>
         </View>
@@ -46,25 +48,25 @@ export default function HomeScreen() {
       <ScrollView style={styles.content}>
         {isRestaurant ? (
           <View style={styles.restaurantDashboard}>
-            <Text style={styles.sectionTitle}>Швидкий старт</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Швидкий старт</Text>
             <TouchableOpacity
-              style={styles.actionCard}
+              style={[styles.actionCard, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}
               onPress={() => router.push('/(tabs)/manage')}
             >
-              <Text style={styles.actionTitle}>Додати нову страву</Text>
-              <Text style={styles.actionSubtitle}>Виставте залишки зі знижкою</Text>
+              <Text style={[styles.actionTitle, { color: theme.colors.primaryAccent }]}>Додати нову страву</Text>
+              <Text style={[styles.actionSubtitle, { color: theme.colors.textSecondary }]}>Виставте залишки зі знижкою</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.foodList}>
             <View style={styles.listHeaderRow}>
-              <Text style={styles.sectionTitle}>Найближчі</Text>
+              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Найближчі</Text>
             </View>
 
             {foodItems.length === 0 ? (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyTitle}>Поки що немає доступних позицій поруч</Text>
-                <Text style={styles.emptySubtitle}>
+                <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>Поки що немає доступних позицій поруч</Text>
+                <Text style={[styles.emptySubtitle, { color: theme.colors.textSecondary }]}>
                   Поверніться трохи пізніше або перегляньте карту, щоб знайти заклади в інших районах.
                 </Text>
               </View>
@@ -74,6 +76,7 @@ export default function HomeScreen() {
                   key={item.id}
                   style={[
                     styles.foodCard,
+                    { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border },
                     (!item.isAvailable || orderingItemId === item.id) && styles.disabledCard,
                   ]}
                   onPress={() => confirmAndPlaceOrder(item)}
@@ -82,28 +85,28 @@ export default function HomeScreen() {
                   <Image
                     source={{
                       uri: item.imageBase64
-                      ? `data:image/jpeg;base64,${item.imageBase64}`
-                      : 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg'
+                        ? `data:image/jpeg;base64,${item.imageBase64}`
+                        : 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg'
                     
                     }}
-                    style={styles.foodImage}
+                    style={[styles.foodImage, { backgroundColor: theme.colors.surfaceTertiary }]}
                   />
                   <View style={styles.foodInfo}>
-                    <Text style={styles.foodTitle}>{item.title}</Text>
+                    <Text style={[styles.foodTitle, { color: theme.colors.text }]}>{item.title}</Text>
                     <View style={styles.restaurantInfo}>
-                      <MapPin size={14} color="#9CA3AF" />
-                      <Text style={styles.restaurantName}>
+                      <MapPin size={14} color={theme.colors.textSecondary} />
+                      <Text style={[styles.restaurantName, { color: theme.colors.textSecondary }]}>
                         {typeof item.restaurant !== 'string' ? item.restaurant?.name : ''}
                       </Text>
                     </View>
                     <View style={styles.priceRow}>
                       <View style={styles.priceContainer}>
-                        <Text style={styles.originalPrice}>{formatPrice(item.originalPrice)}</Text>
-                        <Text style={styles.discountPrice}>{formatPrice(item.discountedPrice)}</Text>
+                        <Text style={[styles.originalPrice, { color: theme.colors.textTertiary }]}>{formatPrice(item.originalPrice)}</Text>
+                        <Text style={[styles.discountPrice, { color: theme.colors.primaryAccent }]}>{formatPrice(item.discountedPrice)}</Text>
                       </View>
                       <View style={styles.timeContainer}>
-                        <Clock size={14} color="#F87171" />
-                        <Text style={styles.timeText}>{getTimeUntilExpiry(item.expiryTime)}</Text>
+                        <Clock size={14} color={theme.colors.errorLight} />
+                        <Text style={[styles.timeText, { color: theme.colors.errorLight }]}>{getTimeUntilExpiry(item.expiryTime)}</Text>
                       </View>
                     </View>
                     <View style={styles.discountBadge}>
@@ -128,15 +131,12 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0F',
   },
   header: {
     paddingTop: 52,
     paddingBottom: 16,
     paddingHorizontal: 20,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#2A2A3E',
-    backgroundColor: '#151520',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -144,12 +144,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#E5E5F0',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: '#9CA3AF',
   },
   content: {
     flex: 1,
@@ -161,15 +159,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#E5E5F0',
     marginBottom: 12,
   },
   actionCard: {
-    backgroundColor: '#1A1A2E',
     borderRadius: 16,
     padding: 18,
     borderWidth: 1,
-    borderColor: '#2A2A3E',
     shadowOpacity: 0.2,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
@@ -178,12 +173,10 @@ const styles = StyleSheet.create({
   actionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#10b981',
     marginBottom: 4,
   },
   actionSubtitle: {
     fontSize: 14,
-    color: '#9CA3AF',
   },
   foodList: {
     paddingHorizontal: 20,

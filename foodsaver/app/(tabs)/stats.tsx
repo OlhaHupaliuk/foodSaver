@@ -5,14 +5,15 @@ import { api } from '../../services/api';
 import { RestaurantStatisticsResponse } from '../../types/auth';
 import { formatPrice } from '../../utils/format';
 import { router } from 'expo-router';
+import { useTheme } from '../../contexts/ThemeContext';
 
 // Mock data for demonstration
 const MOCK_STATS: RestaurantStatisticsResponse = {
   summary: {
-    totalFoodSaved: 342,
-    totalMoneySaved: 45680,
-    totalRevenue: 123450,
-    totalOrders: 156,
+    totalFoodSaved: 142,
+    totalMoneySaved: 15680,
+    totalRevenue: 73450,
+    totalOrders: 130,
     averageRating: 4.7,
   },
   charts: {
@@ -39,6 +40,7 @@ const MOCK_STATS: RestaurantStatisticsResponse = {
 
 export default function StatsScreen() {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const [stats, setStats] = useState<RestaurantStatisticsResponse | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [statsError, setStatsError] = useState<string | null>(null);
@@ -91,28 +93,28 @@ export default function StatsScreen() {
 
   if (!user || user.role !== 'restaurant_owner') {
     return (
-      <View style={styles.centered}>
-        <Text style={styles.infoText}>Статистика доступна лише власникам ресторанів.</Text>
+      <View style={[styles.centered, { backgroundColor: theme.colors.background }]}>
+        <Text style={[styles.infoText, { color: theme.colors.text }]}>Статистика доступна лише власникам ресторанів.</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Статистика</Text>
-        <Text style={styles.subtitle}>Економія та виручка вашого закладу</Text>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border }]}>
+        <Text style={[styles.title, { color: theme.colors.text }]}>Статистика</Text>
+        <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>Економія та виручка вашого закладу</Text>
       </View>
 
       <ScrollView style={styles.content}>
         {!user.restaurant && (
-          <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>Створіть ресторан</Text>
-            <Text style={styles.infoText}>
+          <View style={[styles.infoCard, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.primary }]}>
+            <Text style={[styles.infoTitle, { color: theme.colors.text }]}>Створіть ресторан</Text>
+            <Text style={[styles.infoText, { color: theme.colors.textSecondary }]}>
               Щоб переглядати статистику, спочатку додайте інформацію про ваш заклад.
             </Text>
             <TouchableOpacity
-              style={styles.infoButton}
+              style={[styles.infoButton, { backgroundColor: theme.colors.primary }]}
               onPress={() => router.push('/(tabs)/manage')}
             >
               <Text style={styles.infoButtonText}>Перейти до управління</Text>
@@ -123,14 +125,15 @@ export default function StatsScreen() {
         {user.restaurant && (
           <View style={styles.body}>
             <View style={styles.statsHeaderRow}>
-              <Text style={styles.sectionTitle}>Огляд показників</Text>
+              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Огляд показників</Text>
               <View style={styles.periodSelector}>
                 {(['week', 'month', 'year', 'all'] as const).map((p, index) => (
                   <TouchableOpacity
                     key={index}
                     style={[
                       styles.periodChip,
-                      period === p && styles.periodChipActive,
+                      { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border },
+                      period === p && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
                     ]}
                     onPress={() => setPeriod(p)}
                     disabled={statsLoading}
@@ -138,7 +141,8 @@ export default function StatsScreen() {
                     <Text
                       style={[
                         styles.periodChipText,
-                        period === p && styles.periodChipTextActive,
+                        { color: theme.colors.textSecondary },
+                        period === p && { color: theme.colors.white, fontWeight: '600' },
                       ]}
                     >
                       {p === 'week'
@@ -156,56 +160,56 @@ export default function StatsScreen() {
 
             {statsLoading && (
               <View style={styles.loadingStats}>
-                <ActivityIndicator size="small" color="#10b981" />
-                <Text style={styles.loadingStatsText}>Завантаження статистики...</Text>
+                <ActivityIndicator size="small" color={theme.colors.primaryAccent} />
+                <Text style={[styles.loadingStatsText, { color: theme.colors.textSecondary }]}>Завантаження статистики...</Text>
               </View>
             )}
 
             {statsError && !statsLoading && (
-              <View style={styles.errorCard}>
-                <Text style={styles.errorTitle}>Помилка</Text>
-                <Text style={styles.errorDescription}>{statsError}</Text>
+              <View style={[styles.errorCard, { backgroundColor: theme.colors.errorBackground, borderColor: theme.colors.errorLight }]}>
+                <Text style={[styles.errorTitle, { color: theme.colors.errorLight }]}>Помилка</Text>
+                <Text style={[styles.errorDescription, { color: theme.colors.errorLight }]}>{statsError}</Text>
               </View>
             )}
 
             {stats && !statsLoading && !statsError && (
               <>
                 <View style={styles.summaryGrid}>
-                  <View style={styles.summaryCard}>
-                    <Text style={styles.summaryLabel}>Зекономлено грошей</Text>
-                    <Text style={styles.summaryValue}>
+                  <View style={[styles.summaryCard, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
+                    <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Зекономлено грошей</Text>
+                    <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
                       {formatPrice(stats.summary.totalMoneySaved || 0)}
                     </Text>
                   </View>
-                  <View style={styles.summaryCard}>
-                    <Text style={styles.summaryLabel}>Виручка</Text>
-                    <Text style={styles.summaryValue}>
+                  <View style={[styles.summaryCard, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
+                    <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Виручка</Text>
+                    <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
                       {formatPrice(stats.summary.totalRevenue || 0)}
                     </Text>
                   </View>
-                  <View style={styles.summaryCard}>
-                    <Text style={styles.summaryLabel}>Збережено порцій</Text>
-                    <Text style={styles.summaryValue}>
+                  <View style={[styles.summaryCard, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
+                    <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Збережено порцій</Text>
+                    <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
                       {stats.summary.totalFoodSaved || 0}
                     </Text>
                   </View>
-                  <View style={styles.summaryCard}>
-                    <Text style={styles.summaryLabel}>Замовлень</Text>
-                    <Text style={styles.summaryValue}>
+                  <View style={[styles.summaryCard, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
+                    <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Замовлень</Text>
+                    <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
                       {stats.summary.totalOrders || 0}
                     </Text>
                   </View>
-                  <View style={styles.summaryCard}>
-                    <Text style={styles.summaryLabel}>Середній рейтинг</Text>
-                    <Text style={styles.summaryValue}>
+                  <View style={[styles.summaryCard, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
+                    <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Середній рейтинг</Text>
+                    <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
                       {stats.summary.averageRating?.toFixed(1) ?? '—'}
                     </Text>
                   </View>
                 </View>
 
                 {currentChart.length > 0 && (
-                  <View style={styles.chartCard}>
-                    <Text style={styles.chartTitle}>
+                  <View style={[styles.chartCard, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
+                    <Text style={[styles.chartTitle, { color: theme.colors.text }]}>
                       Динаміка виручки ({period === 'week' ? 'по тижнях' : 'по місяцях'})
                     </Text>
                     {currentChart.map((point) => {
@@ -221,16 +225,16 @@ export default function StatsScreen() {
                       return (
                         <View key={point.label} style={styles.chartRow}>
                           <View style={styles.chartRowHeader}>
-                            <Text style={styles.chartLabel}>{point.label}</Text>
-                            <Text style={styles.chartValue}>
+                            <Text style={[styles.chartLabel, { color: theme.colors.textSecondary }]}>{point.label}</Text>
+                            <Text style={[styles.chartValue, { color: theme.colors.text }]}>
                               {formatPrice(point.revenue)}
                             </Text>
                           </View>
-                          <View style={styles.chartBarBackground}>
+                          <View style={[styles.chartBarBackground, { backgroundColor: theme.colors.surfaceTertiary }]}>
                             <View
                               style={[
                                 styles.chartBarFill,
-                                { width: `${widthPercent}%` },
+                                { width: `${widthPercent}%`, backgroundColor: theme.colors.primary },
                               ]}
                             />
                           </View>
@@ -242,8 +246,8 @@ export default function StatsScreen() {
 
                 {/* Money Saved Chart - Line-like visualization */}
                 {currentChart.length > 0 && (
-                  <View style={styles.chartCard}>
-                    <Text style={styles.chartTitle}>
+                  <View style={[styles.chartCard, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
+                    <Text style={[styles.chartTitle, { color: theme.colors.text }]}>
                       Економія грошей ({period === 'week' ? 'по тижнях' : 'по місяцях'})
                     </Text>
                     {currentChart.map((point) => {
@@ -259,16 +263,16 @@ export default function StatsScreen() {
                       return (
                         <View key={`saved-${point.label}`} style={styles.chartRow}>
                           <View style={styles.chartRowHeader}>
-                            <Text style={styles.chartLabel}>{point.label}</Text>
-                            <Text style={styles.chartValue}>
+                            <Text style={[styles.chartLabel, { color: theme.colors.textSecondary }]}>{point.label}</Text>
+                            <Text style={[styles.chartValue, { color: theme.colors.text }]}>
                               {formatPrice(point.moneySaved)}
                             </Text>
                           </View>
-                          <View style={styles.chartBarBackground}>
+                          <View style={[styles.chartBarBackground, { backgroundColor: theme.colors.surfaceTertiary }]}>
                             <View
                               style={[
                                 styles.chartBarFillMoneySaved,
-                                { width: `${widthPercent}%` },
+                                { width: `${widthPercent}%`, backgroundColor: '#06B6D4' },
                               ]}
                             />
                           </View>
@@ -280,8 +284,8 @@ export default function StatsScreen() {
 
                 {/* Orders Chart - Column visualization */}
                 {currentChart.length > 0 && (
-                  <View style={styles.chartCard}>
-                    <Text style={styles.chartTitle}>
+                  <View style={[styles.chartCard, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
+                    <Text style={[styles.chartTitle, { color: theme.colors.text }]}>
                       Кількість замовлень ({period === 'week' ? 'по тижнях' : 'по місяцях'})
                     </Text>
                     <View style={styles.ordersChartContainer}>
@@ -301,12 +305,12 @@ export default function StatsScreen() {
                               <View
                                 style={[
                                   styles.ordersChartBar,
-                                  { height: `${heightPercent}%` },
+                                  { height: `${heightPercent}%`, backgroundColor: '#8B5CF6' },
                                 ]}
                               />
                             </View>
-                            <Text style={styles.ordersChartLabel}>{point.label}</Text>
-                            <Text style={styles.ordersChartValue}>{point.orders}</Text>
+                            <Text style={[styles.ordersChartLabel, { color: theme.colors.textSecondary }]}>{point.label}</Text>
+                            <Text style={[styles.ordersChartValue, { color: theme.colors.text }]}>{point.orders}</Text>
                           </View>
                         );
                       })}
@@ -316,8 +320,8 @@ export default function StatsScreen() {
 
                 {/* Comparison Chart - Revenue vs Money Saved */}
                 {currentChart.length > 0 && (
-                  <View style={styles.chartCard}>
-                    <Text style={styles.chartTitle}>
+                  <View style={[styles.chartCard, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
+                    <Text style={[styles.chartTitle, { color: theme.colors.text }]}>
                       Порівняння: Виручка vs Економія
                     </Text>
                     {currentChart.map((point) => {
@@ -336,36 +340,36 @@ export default function StatsScreen() {
 
                       return (
                         <View key={`comparison-${point.label}`} style={styles.comparisonRow}>
-                          <Text style={styles.comparisonLabel}>{point.label}</Text>
+                          <Text style={[styles.comparisonLabel, { color: theme.colors.text }]}>{point.label}</Text>
                           <View style={styles.comparisonBars}>
                             <View style={styles.comparisonBarContainer}>
                               <View style={styles.comparisonBarLabel}>
-                                <Text style={styles.comparisonBarLabelText}>Виручка</Text>
-                                <Text style={styles.comparisonBarValue}>
+                                <Text style={[styles.comparisonBarLabelText, { color: theme.colors.textSecondary }]}>Виручка</Text>
+                                <Text style={[styles.comparisonBarValue, { color: theme.colors.text }]}>
                                   {formatPrice(point.revenue)}
                                 </Text>
                               </View>
-                              <View style={styles.chartBarBackground}>
+                              <View style={[styles.chartBarBackground, { backgroundColor: theme.colors.surfaceTertiary }]}>
                                 <View
                                   style={[
                                     styles.chartBarFill,
-                                    { width: `${revenuePercent}%` },
+                                    { width: `${revenuePercent}%`, backgroundColor: theme.colors.primary },
                                   ]}
                                 />
                               </View>
                             </View>
                             <View style={styles.comparisonBarContainer}>
                               <View style={styles.comparisonBarLabel}>
-                                <Text style={styles.comparisonBarLabelText}>Економія</Text>
-                                <Text style={styles.comparisonBarValue}>
+                                <Text style={[styles.comparisonBarLabelText, { color: theme.colors.textSecondary }]}>Економія</Text>
+                                <Text style={[styles.comparisonBarValue, { color: theme.colors.text }]}>
                                   {formatPrice(point.moneySaved)}
                                 </Text>
                               </View>
-                              <View style={styles.chartBarBackground}>
+                              <View style={[styles.chartBarBackground, { backgroundColor: theme.colors.surfaceTertiary }]}>
                                 <View
                                   style={[
                                     styles.chartBarFillMoneySaved,
-                                    { width: `${savedPercent}%` },
+                                    { width: `${savedPercent}%`, backgroundColor: '#06B6D4' },
                                   ]}
                                 />
                               </View>

@@ -5,9 +5,11 @@ import { useAuth } from '../../hooks/useAuth';
 import { api } from '../../services/api';
 import { Order } from '../../types/auth';
 import { ChevronDown } from 'lucide-react-native';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function OrdersScreen() {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
@@ -161,52 +163,52 @@ export default function OrdersScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Замовлення</Text>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border }]}>
+        <Text style={[styles.title, { color: theme.colors.text }]}>Замовлення</Text>
         <TouchableOpacity style={styles.refreshButton} onPress={loadOrders} disabled={loading}>
-          <Text style={styles.refreshText}>{loading ? 'Оновлення...' : 'Оновити'}</Text>
+          <Text style={[styles.refreshText, { color: theme.colors.primary }]}>{loading ? 'Оновлення...' : 'Оновити'}</Text>
         </TouchableOpacity>
       </View>
 
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#10b981" />
+          <ActivityIndicator size="large" color={theme.colors.primaryAccent} />
           <Text style={styles.loadingText}>Завантаження замовлень...</Text>
         </View>
       ) : (
         <ScrollView style={styles.content}>
           {orders.length === 0 ? (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>У вас поки немає замовлень</Text>
+              <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>У вас поки немає замовлень</Text>
             </View>
           ) : (
             orders.map((order) => (
-              <View key={order.id} style={styles.orderCard}>
+              <View key={order.id} style={[styles.orderCard, { backgroundColor: theme.colors.surfaceSecondary }]}>
                 <View style={styles.orderHeader}>
                   <View style={{ flex: 1 }}>
                     {isRestaurantOwner ? (
                       <>
-                        <Text style={styles.customerName}>
+                        <Text style={[styles.customerName, { color: theme.colors.text }]}>
                           {order.user && typeof order.user !== 'string' 
                             ? (order.user as any).name || (order.user as any).email 
                             : 'Користувач'}
                         </Text>
                         {order.user && typeof order.user !== 'string' && (order.user as any).phone && (
-                          <Text style={styles.customerPhone}>{(order.user as any).phone}</Text>
+                          <Text style={[styles.customerPhone, { color: theme.colors.textSecondary }]}>{(order.user as any).phone}</Text>
                         )}
                         {order.user && typeof order.user !== 'string' && (order.user as any).email && (
-                          <Text style={styles.customerEmail}>{(order.user as any).email}</Text>
+                          <Text style={[styles.customerEmail, { color: theme.colors.textSecondary }]}>{(order.user as any).email}</Text>
                         )}
                       </>
                     ) : (
-                      <Text style={styles.restaurantName}>
+                      <Text style={[styles.restaurantName, { color: theme.colors.text }]}>
                         {order.restaurant && typeof order.restaurant !== 'string' 
                           ? order.restaurant.name 
                           : 'Ресторан'}
                       </Text>
                     )}
-                    <Text style={styles.orderSummary}>{getOrderSummary(order)}</Text>
+                    <Text style={[styles.orderSummary, { color: theme.colors.textSecondary }]}>{getOrderSummary(order)}</Text>
                   </View>
                   <TouchableOpacity
                     style={[
@@ -230,12 +232,12 @@ export default function OrdersScreen() {
                 </View>
 
                 <View style={styles.orderDetails}>
-                  <Text style={styles.orderPrice}>{formatPrice(order.totalAmount)}</Text>
-                  <Text style={styles.orderDate}>{order.createdAt ? formatDateTime(order.createdAt) : ''}</Text>
+                  <Text style={[styles.orderPrice, { color: theme.colors.primaryAccent }]}>{formatPrice(order.totalAmount)}</Text>
+                  <Text style={[styles.orderDate, { color: theme.colors.textSecondary }]}>{order.createdAt ? formatDateTime(order.createdAt) : ''}</Text>
                 </View>
 
                 {order.pickupTime && (
-                  <Text style={styles.pickupTime}>
+                  <Text style={[styles.pickupTime, { color: theme.colors.textSecondary }]}>
                     Забір: {new Date(order.pickupTime).toLocaleString('uk-UA')}
                   </Text>
                 )}

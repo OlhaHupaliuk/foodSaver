@@ -6,9 +6,11 @@
   import { getTimeUntilExpiry } from '../../utils/discount';
   import { useAuth } from '../../hooks/useAuth';
   import { api } from '../../services/api';
+  import { useTheme } from '../../contexts/ThemeContext';
 
   export default function ManageScreen() {
     const { user } = useAuth();
+    const { theme } = useTheme();
     const [restaurant, setRestaurant] = useState<any | null>(null);
     const [foodItems, setFoodItems] = useState<any[]>([]);
     const [showAddModal, setShowAddModal] = useState(false);
@@ -251,13 +253,13 @@
 
     if (!restaurant) {
       return (
-        <View style={styles.container}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Управління</Text>
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+          <View style={[styles.header, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border }]}>
+            <Text style={[styles.title, { color: theme.colors.text }]}>Управління</Text>
           </View>
           <View style={styles.emptyState}>
-            <ActivityIndicator size="large" color="#10b981" />
-            <Text style={styles.emptyText} numberOfLines={1}>
+            <ActivityIndicator size="large" color={theme.colors.primaryAccent} />
+            <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]} numberOfLines={1}>
               Завантаження...
             </Text>
           </View>
@@ -266,22 +268,22 @@
     }
 
     return (
-      <View style={styles.container}>
-        <View style={styles.header}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <View style={[styles.header, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border }]}>
           <View>
-            <Text style={styles.title}>Управління</Text>
-            <Text style={styles.headerSubtitle}>{restaurant.name}</Text>
+            <Text style={[styles.title, { color: theme.colors.text }]}>Управління</Text>
+            <Text style={[styles.headerSubtitle, { color: theme.colors.textSecondary }]}>{restaurant.name}</Text>
           </View>
           <View style={styles.headerActions}>
             <TouchableOpacity 
-              style={styles.refreshHeaderButton}
+              style={[styles.refreshHeaderButton, { borderColor: theme.colors.border }]}
               onPress={handleRefresh}
               disabled={loading}
             >
-              <Text style={styles.refreshHeaderText}>{loading ? 'Оновлення...' : 'Оновити'}</Text>
+              <Text style={[styles.refreshHeaderText, { color: theme.colors.primaryAccent }]}>{loading ? 'Оновлення...' : 'Оновити'}</Text>
             </TouchableOpacity>
             <TouchableOpacity 
-              style={styles.addButton} 
+              style={[styles.addButton, { backgroundColor: theme.colors.primary }]} 
               onPress={() => setShowAddModal(true)}
             >
               <Plus size={24} color="#ffffff" />
@@ -291,12 +293,12 @@
 
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#10b981" />
+            <ActivityIndicator size="large" color={theme.colors.primaryAccent} />
             <Text style={styles.loadingText}>Завантаження пропозицій...</Text>
           </View>
         ) : (
           <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-            <View style={styles.statsCard}>
+            <View style={[styles.statsCard, { backgroundColor: theme.colors.primary }]}>
               <Text style={styles.statsTitle}>{restaurant.name}</Text>
               <Text style={styles.statsValue}>
                 {foodItems.length} {foodItems.length === 1 ? 'позиція' : 'позицій'}
@@ -318,15 +320,16 @@
               </View>
             ) : (
               foodItems.map((item) => (
-                <View key={item.id} style={styles.itemCard}>
+                <View key={item.id} style={[styles.itemCard, { backgroundColor: theme.colors.surfaceSecondary }]}>
                   <View style={styles.itemHeader}>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.itemTitle}>{item.title}</Text>
+                      <Text style={[styles.itemTitle, { color: theme.colors.text }]}>{item.title}</Text>
                     </View>
                     <TouchableOpacity
                       style={[
                         styles.statusBadge,
-                        !item.isAvailable && styles.statusBadgeInactive
+                        { backgroundColor: theme.colors.primary },
+                        !item.isAvailable && { backgroundColor: theme.colors.textTertiary }
                       ]}
                       onPress={() => toggleAvailability(item.id, item.isAvailable)}
                     >
@@ -336,7 +339,7 @@
                     </TouchableOpacity>
                   </View>
 
-                  <Text style={styles.itemDescription} numberOfLines={2}>
+                  <Text style={[styles.itemDescription, { color: theme.colors.textSecondary }]} numberOfLines={2}>
                     {item.description}
                   </Text>
 
@@ -390,14 +393,14 @@
           onRequestClose={() => setShowAddModal(false)}
         >
           <KeyboardAvoidingView 
-            style={styles.modalOverlay}
+            style={[styles.modalOverlay, { backgroundColor: theme.colors.overlay }]}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           >
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Додати пропозицію</Text>
+            <View style={[styles.modalContent, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.border }]}>
+              <View style={[styles.modalHeader, { borderBottomColor: theme.colors.border }]}>
+                <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Додати пропозицію</Text>
                 <TouchableOpacity onPress={() => setShowAddModal(false)}>
-                  <X size={24} color="#9CA3AF" />
+                  <X size={24} color={theme.colors.textSecondary} />
                 </TouchableOpacity>
               </View>
 
@@ -407,18 +410,18 @@
                 keyboardShouldPersistTaps="handled"
               >
                 <TextInput
-                  style={styles.modalInput}
+                  style={[styles.modalInput, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                   placeholder="Назва страви *"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor={theme.colors.textSecondary}
                   value={newItem.title}
                   onChangeText={(text) => setNewItem({ ...newItem, title: text })}
                   editable={!saving}
                 />
 
                 <TextInput
-                  style={[styles.modalInput, styles.modalInputMultiline]}
+                  style={[styles.modalInput, styles.modalInputMultiline, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                   placeholder="Опис *"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor={theme.colors.textSecondary}
                   value={newItem.description}
                   onChangeText={(text) => setNewItem({ ...newItem, description: text })}
                   multiline
@@ -427,9 +430,9 @@
                 />
 
                 <TextInput
-                  style={styles.modalInput}
+                  style={[styles.modalInput, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                   placeholder="Категорія (напр. Суші, Піца)"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor={theme.colors.textSecondary}
                   value={newItem.category}
                   onChangeText={(text) => setNewItem({ ...newItem, category: text })}
                   editable={!saving}
@@ -469,9 +472,9 @@
                 </View>
 
                 <TextInput
-                  style={styles.modalInput}
+                  style={[styles.modalInput, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                   placeholder="Оригінальна ціна (грн) *"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor={theme.colors.textSecondary}
                   value={newItem.original_price}
                   onChangeText={(text) => setNewItem({ ...newItem, original_price: text })}
                   keyboardType="decimal-pad"
@@ -479,9 +482,9 @@
                 />
 
                 <TextInput
-                  style={styles.modalInput}
+                  style={[styles.modalInput, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                   placeholder="Ціна зі знижкою (грн) *"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor={theme.colors.textSecondary}
                   value={newItem.discount_price}
                   onChangeText={(text) => setNewItem({ ...newItem, discount_price: text })}
                   keyboardType="decimal-pad"
@@ -489,18 +492,18 @@
                 />
 
                 {calculateDiscount() > 0 && (
-                  <View style={styles.discountPreview}>
-                    <DollarSign size={16} color="#10b981" />
-                    <Text style={styles.discountPreviewText}>
+                  <View style={[styles.discountPreview, { backgroundColor: theme.colors.surfaceTertiary, borderColor: theme.colors.primary }]}>
+                    <DollarSign size={16} color={theme.colors.primaryAccent} />
+                    <Text style={[styles.discountPreviewText, { color: theme.colors.primaryAccent }]}>
                       Знижка: {calculateDiscount()}%
                     </Text>
                   </View>
                 )}
 
                 <TextInput
-                  style={styles.modalInput}
+                  style={[styles.modalInput, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                   placeholder="Кількість порцій *"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor={theme.colors.textSecondary}
                   value={newItem.quantity}
                   onChangeText={(text) => setNewItem({ ...newItem, quantity: text })}
                   keyboardType="number-pad"
@@ -508,9 +511,9 @@
                 />
 
                 <TextInput
-                  style={styles.modalInput}
+                  style={[styles.modalInput, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                   placeholder="Годин до закінчення *"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor={theme.colors.textSecondary}
                   value={newItem.expiry_hours}
                   onChangeText={(text) => setNewItem({ ...newItem, expiry_hours: text })}
                   keyboardType="number-pad"
@@ -518,7 +521,7 @@
                 />
 
                 <TouchableOpacity 
-                  style={[styles.modalButton, saving && styles.modalButtonDisabled]}
+                  style={[styles.modalButton, { backgroundColor: theme.colors.primary, shadowColor: theme.colors.shadowPrimary }, saving && styles.modalButtonDisabled]}
                   onPress={handleAddItem}
                   disabled={saving}
                 >
@@ -530,11 +533,11 @@
                 </TouchableOpacity>
 
                 <TouchableOpacity 
-                  style={styles.modalCancelButton} 
+                  style={[styles.modalCancelButton, { backgroundColor: 'transparent' }]} 
                   onPress={() => setShowAddModal(false)}
                   disabled={saving}
                 >
-                  <Text style={styles.modalCancelButtonText}>Скасувати</Text>
+                  <Text style={[styles.modalCancelButtonText, { color: theme.colors.textSecondary }]}>Скасувати</Text>
                 </TouchableOpacity>
               </ScrollView>
             </View>

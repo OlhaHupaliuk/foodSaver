@@ -1,13 +1,15 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking, Modal, TextInput, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Image } from 'react-native';
-import { LogOut, User, Mail, Phone, MapPin, Store, ExternalLink, Plus, X, Edit2, Camera } from 'lucide-react-native';
+import { LogOut, User, Mail, Phone, MapPin, Store, ExternalLink, Plus, X, Edit2, Camera, Moon, Sun } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { api } from '../../services/api';
 import * as ImagePicker from 'expo-image-picker';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function ProfileScreen() {
   const { signOut, user, refreshUser } = useAuth();
+  const { theme, themeMode, toggleTheme } = useTheme();
   const [showCreateRestaurant, setShowCreateRestaurant] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showEditRestaurant, setShowEditRestaurant] = useState(false);
@@ -218,25 +220,25 @@ export default function ProfileScreen() {
   const hasRestaurant = user?.restaurant || user?.role === 'restaurant_owner';
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Профіль</Text>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border }]}>
+        <Text style={[styles.title, { color: theme.colors.text }]}>Профіль</Text>
         <TouchableOpacity onPress={handleOpenEditProfile} style={styles.editButton}>
-          <Edit2 size={20} color="#1B7F5F" />
+          <Edit2 size={20} color={theme.colors.primary} />
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.profileCard}>
+        <View style={[styles.profileCard, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
           <View style={styles.avatarContainer}>
             {user?.photo ? (
               <Image source={{ uri: user.photo }} style={styles.avatarImage} />
             ) : (
-              <View style={[styles.avatar, hasRestaurant && styles.avatarRestaurant]}>
+              <View style={[styles.avatar, { backgroundColor: theme.colors.surfaceTertiary, borderColor: theme.colors.primary }]}>
                 {hasRestaurant ? (
-                  <Store size={48} color="#1B7F5F" />
+                  <Store size={48} color={theme.colors.primary} />
                 ) : (
-                  <User size={48} color="#1B7F5F" />
+                  <User size={48} color={theme.colors.primary} />
                 )}
               </View>
             )}
@@ -245,29 +247,29 @@ export default function ProfileScreen() {
           <View style={styles.infoSection}>
             {/* Ім'я */}
             <View style={styles.infoRow}>
-              <User size={20} color="#9CA3AF" />
+              <User size={20} color={theme.colors.textSecondary} />
               <View style={styles.infoContent}>
-                <Text style={styles.infoLabel}>Ім'я</Text>
-                <Text style={styles.infoValue}>{user?.name || ''}</Text>
+                <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Ім'я</Text>
+                <Text style={[styles.infoValue, { color: theme.colors.text }]}>{user?.name || ''}</Text>
               </View>
             </View>
 
             {/* Email */}
             <View style={styles.infoRow}>
-              <Mail size={20} color="#9CA3AF" />
+              <Mail size={20} color={theme.colors.textSecondary} />
               <View style={styles.infoContent}>
-                <Text style={styles.infoLabel}>Email</Text>
-                <Text style={styles.infoValue}>{user?.email || ''}</Text>
+                <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Email</Text>
+                <Text style={[styles.infoValue, { color: theme.colors.text }]}>{user?.email || ''}</Text>
               </View>
             </View>
 
             {/* Телефон */}
             {user?.phone && (
               <View style={styles.infoRow}>
-                <Phone size={20} color="#9CA3AF" />
+                <Phone size={20} color={theme.colors.textSecondary} />
                 <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Телефон</Text>
-                  <Text style={styles.infoValue}>{user.phone}</Text>
+                  <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Телефон</Text>
+                  <Text style={[styles.infoValue, { color: theme.colors.text }]}>{user.phone}</Text>
                 </View>
               </View>
             )}
@@ -275,37 +277,37 @@ export default function ProfileScreen() {
             {/* Інформація про ресторан */}
             {hasRestaurant && user?.restaurant && (
               <>
-                <View style={styles.divider} />
+                <View style={[styles.divider, { borderBottomColor: theme.colors.border }]} />
                 
                 <View style={styles.restaurantSection}>
                   <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Мій ресторан</Text>
+                    <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Мій ресторан</Text>
                     <TouchableOpacity onPress={handleOpenEditRestaurant} style={styles.editIconButton}>
-                      <Edit2 size={18} color="#1B7F5F" />
+                      <Edit2 size={18} color={theme.colors.primary} />
                     </TouchableOpacity>
                   </View>
 
                   <View style={styles.infoRow}>
-                    <Store size={20} color="#1B7F5F" />
+                    <Store size={20} color={theme.colors.primary} />
                     <View style={styles.infoContent}>
-                      <Text style={styles.infoLabel}>Назва</Text>
-                      <Text style={styles.infoValue}>{user.restaurant.name}</Text>
+                      <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Назва</Text>
+                      <Text style={[styles.infoValue, { color: theme.colors.text }]}>{user.restaurant.name}</Text>
                     </View>
                   </View>
 
                   <View style={styles.infoRow}>
-                    <Phone size={20} color="#1B7F5F" />
+                    <Phone size={20} color={theme.colors.primary} />
                     <View style={styles.infoContent}>
-                      <Text style={styles.infoLabel}>Телефон</Text>
-                      <Text style={styles.infoValue}>{user.restaurant.phone}</Text>
+                      <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Телефон</Text>
+                      <Text style={[styles.infoValue, { color: theme.colors.text }]}>{user.restaurant.phone}</Text>
                     </View>
                   </View>
 
                   <View style={styles.infoRow}>
-                    <MapPin size={20} color="#1B7F5F" />
+                    <MapPin size={20} color={theme.colors.primary} />
                     <View style={styles.infoContent}>
-                      <Text style={styles.infoLabel}>Адреса</Text>
-                      <Text style={styles.infoValue}>{user.restaurant.address}</Text>
+                      <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Адреса</Text>
+                      <Text style={[styles.infoValue, { color: theme.colors.text }]}>{user.restaurant.address}</Text>
                     </View>
                   </View>
 
@@ -314,9 +316,9 @@ export default function ProfileScreen() {
                       style={styles.mapLinkButton}
                       onPress={handleOpenMaps}
                     >
-                      <MapPin size={18} color="#1B7F5F" />
-                      <Text style={styles.mapLinkText}>Відкрити на Google Maps</Text>
-                      <ExternalLink size={16} color="#1B7F5F" />
+                      <MapPin size={18} color={theme.colors.primary} />
+                      <Text style={[styles.mapLinkText, { color: theme.colors.primary }]}>Відкрити на Google Maps</Text>
+                      <ExternalLink size={16} color={theme.colors.primary} />
                     </TouchableOpacity>
                   )}
 
@@ -330,23 +332,38 @@ export default function ProfileScreen() {
             {/* Кнопка для створення ресторану */}
             {!hasRestaurant && (
               <TouchableOpacity 
-                style={styles.createRestaurantButton}
+                style={[styles.createRestaurantButton, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.primary }]}
                 onPress={() => setShowCreateRestaurant(true)}
               >
-                <Plus size={20} color="#1B7F5F" />
-                <Text style={styles.createRestaurantText}>Створити ресторан</Text>
+                <Plus size={20} color={theme.colors.primary} />
+                <Text style={[styles.createRestaurantText, { color: theme.colors.primary }]}>Створити ресторан</Text>
               </TouchableOpacity>
             )}
           </View>
         </View>
 
+        {/* Кнопка перемикання теми */}
+        <TouchableOpacity 
+          style={[styles.themeToggleButton, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]} 
+          onPress={toggleTheme}
+        >
+          {themeMode === 'dark' ? (
+            <Sun size={20} color={theme.colors.primary} />
+          ) : (
+            <Moon size={20} color={theme.colors.primary} />
+          )}
+          <Text style={[styles.themeToggleText, { color: theme.colors.text }]}>
+            {themeMode === 'dark' ? 'Світла тема' : 'Темна тема'}
+          </Text>
+        </TouchableOpacity>
+
         {/* Кнопка виходу */}
         <TouchableOpacity 
-          style={styles.signOutButton} 
+          style={[styles.signOutButton, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.errorBackground }]} 
           onPress={handleSignOut}
         >
-          <LogOut size={20} color="#ef4444" />
-          <Text style={styles.signOutText}>Вийти</Text>
+          <LogOut size={20} color={theme.colors.error} />
+          <Text style={[styles.signOutText, { color: theme.colors.errorLight }]}>Вийти</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -387,18 +404,18 @@ export default function ProfileScreen() {
               />
 
               <TextInput
-                style={styles.modalInput}
+                style={[styles.modalInput, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                 placeholder="Адреса *"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={theme.colors.textSecondary}
                 value={restaurantData.address}
                 onChangeText={(text) => setRestaurantData({...restaurantData, address: text})}
                 editable={!saving}
               />
 
               <TextInput
-                style={styles.modalInput}
+                style={[styles.modalInput, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                 placeholder="Google Maps посилання *"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={theme.colors.textSecondary}
                 value={restaurantData.googleMapsLink}
                 onChangeText={(text) => setRestaurantData({...restaurantData, googleMapsLink: text})}
                 autoCapitalize="none"
@@ -406,9 +423,9 @@ export default function ProfileScreen() {
               />
 
               <TextInput
-                style={[styles.modalInput, styles.modalInputMultiline]}
+                style={[styles.modalInput, styles.modalInputMultiline, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                 placeholder="Опис (необов'язково)"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={theme.colors.textSecondary}
                 value={restaurantData.description}
                 onChangeText={(text) => setRestaurantData({...restaurantData, description: text})}
                 multiline
@@ -417,7 +434,7 @@ export default function ProfileScreen() {
               />
 
               <TouchableOpacity 
-                style={[styles.modalButton, saving && styles.modalButtonDisabled]}
+                style={[styles.modalButton, { backgroundColor: theme.colors.primary, shadowColor: theme.colors.shadowPrimary }, saving && styles.modalButtonDisabled]}
                 onPress={handleCreateRestaurant}
                 disabled={saving}
               >
@@ -429,11 +446,11 @@ export default function ProfileScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity 
-                style={styles.modalCancelButton}
+                style={[styles.modalCancelButton, { backgroundColor: 'transparent' }]}
                 onPress={() => setShowCreateRestaurant(false)}
                 disabled={saving}
               >
-                <Text style={styles.modalCancelButtonText}>Скасувати</Text>
+                <Text style={[styles.modalCancelButtonText, { color: theme.colors.textSecondary }]}>Скасувати</Text>
               </TouchableOpacity>
             </ScrollView>
           </View>
@@ -449,13 +466,13 @@ export default function ProfileScreen() {
       >
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.modalOverlay}
+          style={[styles.modalOverlay, { backgroundColor: theme.colors.overlay }]}
         >
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Редагувати профіль</Text>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.border }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: theme.colors.border }]}>
+              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Редагувати профіль</Text>
               <TouchableOpacity onPress={() => setShowEditProfile(false)}>
-                <X size={24} color="#6b7280" />
+                <X size={24} color={theme.colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
@@ -463,10 +480,10 @@ export default function ProfileScreen() {
               {/* Photo Section */}
               <View style={styles.photoSection}>
                 {profileData.photo ? (
-                  <Image source={{ uri: profileData.photo }} style={styles.editAvatarImage} />
+                  <Image source={{ uri: profileData.photo }} style={[styles.editAvatarImage, { borderColor: theme.colors.primary }]} />
                 ) : (
-                  <View style={styles.editAvatar}>
-                    <User size={48} color="#1B7F5F" />
+                  <View style={[styles.editAvatar, { backgroundColor: theme.colors.surfaceTertiary, borderColor: theme.colors.primary }]}>
+                    <User size={48} color={theme.colors.primary} />
                   </View>
                 )}
                 <View style={styles.photoButtonsRow}>
@@ -475,37 +492,37 @@ export default function ProfileScreen() {
                     onPress={handlePickImage}
                     disabled={saving}
                   >
-                    <Camera size={20} color="#1B7F5F" />
-                    <Text style={styles.photoButtonText}>
+                    <Camera size={20} color={theme.colors.primary} />
+                    <Text style={[styles.photoButtonText, { color: theme.colors.primary }]}>
                       {profileData.photo ? 'Змінити фото' : 'Додати фото'}
                     </Text>
                   </TouchableOpacity>
                   {profileData.photo && (
                     <TouchableOpacity 
-                      style={styles.removePhotoButton}
+                      style={[styles.removePhotoButton, { backgroundColor: theme.colors.errorBackground, borderColor: theme.colors.errorLight }]}
                       onPress={() => setProfileData({ ...profileData, photo: null })}
                       disabled={saving}
                     >
-                      <X size={18} color="#ef4444" />
-                      <Text style={styles.removePhotoButtonText}>Видалити</Text>
+                      <X size={18} color={theme.colors.error} />
+                      <Text style={[styles.removePhotoButtonText, { color: theme.colors.error }]}>Видалити</Text>
                     </TouchableOpacity>
                   )}
                 </View>
               </View>
 
               <TextInput
-                style={styles.modalInput}
+                style={[styles.modalInput, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                 placeholder="Ім'я *"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={theme.colors.textSecondary}
                 value={profileData.name}
                 onChangeText={(text) => setProfileData({...profileData, name: text})}
                 editable={!saving}
               />
 
               <TextInput
-                style={styles.modalInput}
+                style={[styles.modalInput, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                 placeholder="Телефон"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={theme.colors.textSecondary}
                 value={profileData.phone}
                 onChangeText={(text) => setProfileData({...profileData, phone: text})}
                 keyboardType="phone-pad"
@@ -513,7 +530,7 @@ export default function ProfileScreen() {
               />
 
               <TouchableOpacity 
-                style={[styles.modalButton, saving && styles.modalButtonDisabled]}
+                style={[styles.modalButton, { backgroundColor: theme.colors.primary, shadowColor: theme.colors.shadowPrimary }, saving && styles.modalButtonDisabled]}
                 onPress={handleSaveProfile}
                 disabled={saving}
               >
@@ -525,11 +542,11 @@ export default function ProfileScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity 
-                style={styles.modalCancelButton}
+                style={[styles.modalCancelButton, { backgroundColor: 'transparent' }]}
                 onPress={() => setShowEditProfile(false)}
                 disabled={saving}
               >
-                <Text style={styles.modalCancelButtonText}>Скасувати</Text>
+                <Text style={[styles.modalCancelButtonText, { color: theme.colors.textSecondary }]}>Скасувати</Text>
               </TouchableOpacity>
             </ScrollView>
           </View>
@@ -545,30 +562,30 @@ export default function ProfileScreen() {
       >
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.modalOverlay}
+          style={[styles.modalOverlay, { backgroundColor: theme.colors.overlay }]}
         >
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Редагувати ресторан</Text>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.border }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: theme.colors.border }]}>
+              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Редагувати ресторан</Text>
               <TouchableOpacity onPress={() => setShowEditRestaurant(false)}>
-                <X size={24} color="#6b7280" />
+                <X size={24} color={theme.colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.modalForm} keyboardShouldPersistTaps="handled">
               <TextInput
-                style={styles.modalInput}
+                style={[styles.modalInput, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                 placeholder="Назва ресторану *"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={theme.colors.textSecondary}
                 value={restaurantData.name}
                 onChangeText={(text) => setRestaurantData({...restaurantData, name: text})}
                 editable={!saving}
               />
 
               <TextInput
-                style={styles.modalInput}
+                style={[styles.modalInput, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                 placeholder="Телефон *"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={theme.colors.textSecondary}
                 value={restaurantData.phone}
                 onChangeText={(text) => setRestaurantData({...restaurantData, phone: text})}
                 keyboardType="phone-pad"
@@ -576,18 +593,18 @@ export default function ProfileScreen() {
               />
 
               <TextInput
-                style={styles.modalInput}
+                style={[styles.modalInput, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                 placeholder="Адреса *"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={theme.colors.textSecondary}
                 value={restaurantData.address}
                 onChangeText={(text) => setRestaurantData({...restaurantData, address: text})}
                 editable={!saving}
               />
 
               <TextInput
-                style={styles.modalInput}
+                style={[styles.modalInput, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                 placeholder="Google Maps посилання *"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={theme.colors.textSecondary}
                 value={restaurantData.googleMapsLink}
                 onChangeText={(text) => setRestaurantData({...restaurantData, googleMapsLink: text})}
                 autoCapitalize="none"
@@ -595,9 +612,9 @@ export default function ProfileScreen() {
               />
 
               <TextInput
-                style={[styles.modalInput, styles.modalInputMultiline]}
+                style={[styles.modalInput, styles.modalInputMultiline, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                 placeholder="Опис (необов'язково)"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={theme.colors.textSecondary}
                 value={restaurantData.description}
                 onChangeText={(text) => setRestaurantData({...restaurantData, description: text})}
                 multiline
@@ -606,7 +623,7 @@ export default function ProfileScreen() {
               />
 
               <TouchableOpacity 
-                style={[styles.modalButton, saving && styles.modalButtonDisabled]}
+                style={[styles.modalButton, { backgroundColor: theme.colors.primary, shadowColor: theme.colors.shadowPrimary }, saving && styles.modalButtonDisabled]}
                 onPress={handleUpdateRestaurant}
                 disabled={saving}
               >
@@ -618,11 +635,11 @@ export default function ProfileScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity 
-                style={styles.modalCancelButton}
+                style={[styles.modalCancelButton, { backgroundColor: 'transparent' }]}
                 onPress={() => setShowEditRestaurant(false)}
                 disabled={saving}
               >
-                <Text style={styles.modalCancelButtonText}>Скасувати</Text>
+                <Text style={[styles.modalCancelButtonText, { color: theme.colors.textSecondary }]}>Скасувати</Text>
               </TouchableOpacity>
             </ScrollView>
           </View>
@@ -787,6 +804,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#1B7F5F',
+  },
+  themeToggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 16,
+    padding: 16,
+    gap: 8,
+    borderWidth: 1,
+    marginBottom: 12,
+  },
+  themeToggleText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   signOutButton: {
     flexDirection: 'row',

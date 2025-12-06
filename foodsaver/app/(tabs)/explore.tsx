@@ -9,6 +9,7 @@ import { getDefaultCoordinates, getUserLocation } from '../../services/location'
 import { useOrderActions } from '../../hooks/useOrderActions';
 import { useAuth } from '../../hooks/useAuth';
 import { MapPin, Clock, Percent, ShoppingBag, ChevronUp, ChevronDown } from 'lucide-react-native';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const DEFAULT_REGION_DELTA = 0.05;
 
@@ -29,6 +30,7 @@ function coordinatesFromItem(item: FoodItem) {
 
 export default function ExploreScreen() {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const [region, setRegion] = useState<Region>(() => {
     const coords = getDefaultCoordinates();
     return {
@@ -134,11 +136,11 @@ export default function ExploreScreen() {
   const isRestaurant = user?.role === 'restaurant_owner';
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {(loadingLocation || loadingItems) && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#10b981" />
-          <Text style={styles.loadingText}>Завантажуємо доступні позиції...</Text>
+        <View style={[styles.loadingOverlay, { backgroundColor: theme.colors.background + 'E6' }]}>
+          <ActivityIndicator size="large" color={theme.colors.primaryAccent} />
+          <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>Завантажуємо доступні позиції...</Text>
         </View>
       )}
 
@@ -161,28 +163,28 @@ export default function ExploreScreen() {
               tracksViewChanges={false}
             >
               <Callout>
-                <View style={styles.callout}>
+                <View style={[styles.callout, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
                   {item.imageBase64 && (
                     <Image
                       source={{
                         uri: `data:image/jpeg;base64,${item.imageBase64}`
                       }}
-                      style={styles.calloutImage}
+                      style={[styles.calloutImage, { backgroundColor: theme.colors.surfaceTertiary }]}
                     />
                   )}
                   <View style={styles.calloutContent}>
-                    <Text style={styles.calloutTitle}>{item.title}</Text>
+                    <Text style={[styles.calloutTitle, { color: theme.colors.text }]}>{item.title}</Text>
                     
                     {item.description && (
-                      <Text style={styles.calloutDescription} numberOfLines={2}>
+                      <Text style={[styles.calloutDescription, { color: theme.colors.textSecondary }]} numberOfLines={2}>
                         {item.description}
                       </Text>
                     )}
                     
                     {typeof item.restaurant !== 'string' && item.restaurant?.name && (
                       <View style={styles.calloutRestaurantRow}>
-                        <MapPin size={12} color="#9CA3AF" />
-                        <Text style={styles.calloutRestaurant}>
+                        <MapPin size={12} color={theme.colors.textSecondary} />
+                        <Text style={[styles.calloutRestaurant, { color: theme.colors.textSecondary }]}>
                           {item.restaurant.name}
                         </Text>
                       </View>
@@ -190,14 +192,14 @@ export default function ExploreScreen() {
                     
                     <View style={styles.calloutPriceRow}>
                       <View style={styles.calloutPriceContainer}>
-                        <Text style={styles.calloutOriginalPrice}>
+                        <Text style={[styles.calloutOriginalPrice, { color: theme.colors.textTertiary }]}>
                           {formatPrice(item.originalPrice)}
                         </Text>
-                        <Text style={styles.calloutDiscountPrice}>
+                        <Text style={[styles.calloutDiscountPrice, { color: theme.colors.primaryAccent }]}>
                           {formatPrice(item.discountedPrice)}
                         </Text>
                       </View>
-                      <View style={styles.calloutDiscountBadge}>
+                      <View style={[styles.calloutDiscountBadge, { backgroundColor: '#f97316' }]}>
                         <Percent size={10} color="#ffffff" />
                         <Text style={styles.calloutDiscountText}>
                           {Math.round(
@@ -209,13 +211,13 @@ export default function ExploreScreen() {
                     
                     <View style={styles.calloutInfoRow}>
                       <View style={styles.calloutTimeRow}>
-                        <Clock size={12} color="#F87171" />
-                        <Text style={styles.calloutTimeText}>
+                        <Clock size={12} color={theme.colors.errorLight} />
+                        <Text style={[styles.calloutTimeText, { color: theme.colors.errorLight }]}>
                           {getTimeUntilExpiry(item.expiryTime)}
                         </Text>
                       </View>
                       {item.quantity > 0 && (
-                        <Text style={styles.calloutQuantity}>
+                        <Text style={[styles.calloutQuantity, { color: theme.colors.textSecondary }]}>
                           Залишилось: {item.quantity}
                         </Text>
                       )}
@@ -223,7 +225,7 @@ export default function ExploreScreen() {
                     
                     {canPlaceOrder && item.isAvailable && (
                       <TouchableOpacity
-                        style={styles.calloutOrderButton}
+                        style={[styles.calloutOrderButton, { backgroundColor: theme.colors.primaryAccent }]}
                         onPress={() => confirmAndPlaceOrder(item)}
                         disabled={orderingItemId === item.id}
                       >
@@ -239,14 +241,14 @@ export default function ExploreScreen() {
                     )}
                     
                     {!canPlaceOrder && (
-                      <View style={styles.calloutInfoBox}>
-                        <Text style={styles.calloutInfoText}>Переглянути деталі</Text>
+                      <View style={[styles.calloutInfoBox, { backgroundColor: theme.colors.surfaceTertiary }]}>
+                        <Text style={[styles.calloutInfoText, { color: theme.colors.textSecondary }]}>Переглянути деталі</Text>
                       </View>
                     )}
                     
                     {!item.isAvailable && (
-                      <View style={styles.calloutUnavailableBox}>
-                        <Text style={styles.calloutUnavailableText}>Недоступно</Text>
+                      <View style={[styles.calloutUnavailableBox, { backgroundColor: theme.colors.errorBackground, borderColor: theme.colors.errorLight }]}>
+                        <Text style={[styles.calloutUnavailableText, { color: theme.colors.errorLight }]}>Недоступно</Text>
                       </View>
                     )}
                   </View>
@@ -257,15 +259,16 @@ export default function ExploreScreen() {
         })}
       </MapView>
 
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: theme.colors.surfaceSecondary + 'F2', borderColor: theme.colors.border }]}>
         <View>
-          <Text style={styles.headerTitle}>Карта доступних позицій</Text>
-          {locationError && <Text style={styles.errorText}>{locationError}</Text>}
+          <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Карта доступних позицій</Text>
+          {locationError && <Text style={[styles.errorText, { color: theme.colors.errorLight }]}>{locationError}</Text>}
         </View>
       </View>
 
       <View style={[
         styles.bottomSheet,
+        { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
         isBottomSheetCollapsed && styles.bottomSheetCollapsed
       ]}>
         <TouchableOpacity 
@@ -274,9 +277,9 @@ export default function ExploreScreen() {
           activeOpacity={0.7}
         >
           <View style={styles.sheetHeaderLeft}>
-            <Text style={styles.sheetTitle}>Поруч</Text>
+            <Text style={[styles.sheetTitle, { color: theme.colors.text }]}>Поруч</Text>
             {!isBottomSheetCollapsed && (
-              <Text style={styles.sheetSubtitle}>
+              <Text style={[styles.sheetSubtitle, { color: theme.colors.textSecondary }]}>
                 {availableItems.length} {availableItems.length === 1 ? 'позиція' : 'позицій'}
               </Text>
             )}
@@ -290,13 +293,13 @@ export default function ExploreScreen() {
                 }}
                 style={styles.refreshButton}
               >
-                <Text style={styles.refreshText}>Оновити</Text>
+                <Text style={[styles.refreshText, { color: theme.colors.primaryAccent }]}>Оновити</Text>
               </TouchableOpacity>
             )}
             {isBottomSheetCollapsed ? (
-              <ChevronUp size={20} color="#10b981" />
+              <ChevronUp size={20} color={theme.colors.primaryAccent} />
             ) : (
-              <ChevronDown size={20} color="#10b981" />
+              <ChevronDown size={20} color={theme.colors.primaryAccent} />
             )}
           </View>
         </TouchableOpacity>
@@ -306,38 +309,41 @@ export default function ExploreScreen() {
             {!isRestaurant && (
               <View style={styles.filtersRow}>
             <View style={styles.filterGroup}>
-              <Text style={styles.filterLabel}>Ціна</Text>
+              <Text style={[styles.filterLabel, { color: theme.colors.textSecondary }]}>Ціна</Text>
               <View style={styles.chipRow}>
                 <TouchableOpacity
                   style={[
                     styles.chip,
-                    maxPrice == null && styles.chipActive,
+                    { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border },
+                    maxPrice == null && { backgroundColor: theme.colors.primaryAccent, borderColor: theme.colors.primaryAccent },
                   ]}
                   onPress={() => setMaxPrice(null)}
                 >
-                  <Text style={maxPrice == null ? styles.chipTextActive : styles.chipText}>
+                  <Text style={[maxPrice == null ? styles.chipTextActive : styles.chipText, { color: maxPrice == null ? theme.colors.white : theme.colors.textSecondary }]}>
                     Будь-яка
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
                     styles.chip,
-                    maxPrice === 100 && styles.chipActive,
+                    { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border },
+                    maxPrice === 100 && { backgroundColor: theme.colors.primaryAccent, borderColor: theme.colors.primaryAccent },
                   ]}
                   onPress={() => setMaxPrice(100)}
                 >
-                  <Text style={maxPrice === 100 ? styles.chipTextActive : styles.chipText}>
+                  <Text style={[maxPrice === 100 ? styles.chipTextActive : styles.chipText, { color: maxPrice === 100 ? theme.colors.white : theme.colors.textSecondary }]}>
                     до 100₴
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
                     styles.chip,
-                    maxPrice === 200 && styles.chipActive,
+                    { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border },
+                    maxPrice === 200 && { backgroundColor: theme.colors.primaryAccent, borderColor: theme.colors.primaryAccent },
                   ]}
                   onPress={() => setMaxPrice(200)}
                 >
-                  <Text style={maxPrice === 200 ? styles.chipTextActive : styles.chipText}>
+                  <Text style={[maxPrice === 200 ? styles.chipTextActive : styles.chipText, { color: maxPrice === 200 ? theme.colors.white : theme.colors.textSecondary }]}>
                     до 200₴
                   </Text>
                 </TouchableOpacity>
@@ -345,38 +351,41 @@ export default function ExploreScreen() {
             </View>
 
             <View style={styles.filterGroup}>
-              <Text style={styles.filterLabel}>Відстань</Text>
+              <Text style={[styles.filterLabel, { color: theme.colors.textSecondary }]}>Відстань</Text>
               <View style={styles.chipRow}>
                 <TouchableOpacity
                   style={[
                     styles.chip,
-                    maxDistanceKm == null && styles.chipActive,
+                    { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border },
+                    maxDistanceKm == null && { backgroundColor: theme.colors.primaryAccent, borderColor: theme.colors.primaryAccent },
                   ]}
                   onPress={() => setMaxDistanceKm(null)}
                 >
-                  <Text style={maxDistanceKm == null ? styles.chipTextActive : styles.chipText}>
+                  <Text style={[maxDistanceKm == null ? styles.chipTextActive : styles.chipText, { color: maxDistanceKm == null ? theme.colors.white : theme.colors.textSecondary }]}>
                     Будь-яка
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
                     styles.chip,
-                    maxDistanceKm === 1 && styles.chipActive,
+                    { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border },
+                    maxDistanceKm === 1 && { backgroundColor: theme.colors.primaryAccent, borderColor: theme.colors.primaryAccent },
                   ]}
                   onPress={() => setMaxDistanceKm(1)}
                 >
-                  <Text style={maxDistanceKm === 1 ? styles.chipTextActive : styles.chipText}>
+                  <Text style={[maxDistanceKm === 1 ? styles.chipTextActive : styles.chipText, { color: maxDistanceKm === 1 ? theme.colors.white : theme.colors.textSecondary }]}>
                     до 1 км
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
                     styles.chip,
-                    maxDistanceKm === 3 && styles.chipActive,
+                    { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border },
+                    maxDistanceKm === 3 && { backgroundColor: theme.colors.primaryAccent, borderColor: theme.colors.primaryAccent },
                   ]}
                   onPress={() => setMaxDistanceKm(3)}
                 >
-                  <Text style={maxDistanceKm === 3 ? styles.chipTextActive : styles.chipText}>
+                  <Text style={[maxDistanceKm === 3 ? styles.chipTextActive : styles.chipText, { color: maxDistanceKm === 3 ? theme.colors.white : theme.colors.textSecondary }]}>
                     до 3 км
                   </Text>
                 </TouchableOpacity>
@@ -386,7 +395,7 @@ export default function ExploreScreen() {
         )}
 
         {availableItems.length === 0 ? (
-          <Text style={styles.emptyText}>Немає доступних позицій поблизу за вибраними фільтрами</Text>
+          <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>Немає доступних позицій поблизу за вибраними фільтрами</Text>
         ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {availableItems.slice(0, 10).map((item) => (
@@ -394,18 +403,19 @@ export default function ExploreScreen() {
                 key={item.id}
                 style={[
                   styles.itemCard,
+                  { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border },
                   (!item.isAvailable || orderingItemId === item.id || !canPlaceOrder) &&
                     styles.disabledCard,
                 ]}
                 onPress={canPlaceOrder ? () => confirmAndPlaceOrder(item) : undefined}
                 disabled={!item.isAvailable || orderingItemId === item.id || !canPlaceOrder}
               >
-                <Text style={styles.itemTitle}>{item.title}</Text>
-                <Text style={styles.itemRestaurant}>
+                <Text style={[styles.itemTitle, { color: theme.colors.text }]}>{item.title}</Text>
+                <Text style={[styles.itemRestaurant, { color: theme.colors.textSecondary }]}>
                   {typeof item.restaurant !== 'string' ? item.restaurant?.name : ''}
                 </Text>
-                <Text style={styles.itemPrice}>{formatPrice(item.discountedPrice)}</Text>
-                <Text style={styles.itemExpiry}>{getTimeUntilExpiry(item.expiryTime)}</Text>
+                <Text style={[styles.itemPrice, { color: theme.colors.primaryAccent }]}>{formatPrice(item.discountedPrice)}</Text>
+                <Text style={[styles.itemExpiry, { color: theme.colors.errorLight }]}>{getTimeUntilExpiry(item.expiryTime)}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>

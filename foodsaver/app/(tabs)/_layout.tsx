@@ -2,6 +2,7 @@ import { Tabs, Redirect } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 import { Home, Search, ShoppingBag, Store, User, BarChart3 } from 'lucide-react-native';
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export const unstable_settings = {
   ignoreFileSystemRoutes: true,
@@ -9,11 +10,12 @@ export const unstable_settings = {
 
 export default function TabLayout() {
   const { user, loading, isAuthenticated } = useAuth();
+  const { theme } = useTheme();
 
   if (loading) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0A0A0F' }}>
-        <ActivityIndicator size="large" color="#10b981" />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.background }}>
+        <ActivityIndicator size="large" color={theme.colors.primaryAccent} />
       </View>
     );
   }
@@ -26,17 +28,17 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#1B7F5F',
-        tabBarInactiveTintColor: '#9ca3af',
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.textSecondary,
         tabBarStyle: {
-          backgroundColor: '#151520',
+          backgroundColor: theme.colors.surface,
           borderTopWidth: 0,
           height: 90,
           paddingBottom: 20,
           paddingTop: 8,
           elevation: 20,
-          shadowColor: '#000',
-          shadowOpacity: 0.3,
+          shadowColor: theme.colors.shadow,
+          shadowOpacity: 0.1,
           shadowRadius: 10,
           shadowOffset: { width: 0, height: -5 },
         },
