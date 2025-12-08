@@ -93,6 +93,7 @@ export interface FoodItem {
   location?: GeoLocation;
   imageBase64?: string;
   distance?: number;
+  averageRating?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -110,6 +111,7 @@ export interface Order {
   totalDiscount?: number;
   status: 'pending' | 'confirmed' | 'ready' | 'completed' | 'cancelled';
   pickupTime: string;
+  hasReview?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

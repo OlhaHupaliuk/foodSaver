@@ -12,8 +12,23 @@ interface OrderOptions {
 const DEFAULT_PICKUP_OFFSET_MINUTES = 30;
 
 function getRestaurantId(item: FoodItem): string | null {
-  if (!item.restaurant) return null;
-  return typeof item.restaurant === 'string' ? item.restaurant : item.restaurant.id;
+  if (!item.restaurant) {
+    console.error('Food item has no restaurant:', item);
+    return null;
+  }
+  
+  // If restaurant is a string (ID), return it
+  if (typeof item.restaurant === 'string') {
+    return item.restaurant;
+  }
+  
+  // If restaurant is an object, try to get ID from various possible fields
+  if (typeof item.restaurant === 'object') {
+    return item.restaurant.id || (item.restaurant as any)._id || null;
+  }
+  
+  console.error('Restaurant is in unexpected format:', item.restaurant);
+  return null;
 }
 
 export function useOrderActions() {
@@ -35,15 +50,23 @@ export function useOrderActions() {
     const pickupOffsetMinutes = options.pickupOffsetMinutes ?? DEFAULT_PICKUP_OFFSET_MINUTES;
     const pickupTime = new Date(Date.now() + pickupOffsetMinutes * 60 * 1000).toISOString();
 
+    // Get food item ID - try id first, then _id as fallback
+    const foodItemId = item.id || (item as any)._id;
+    if (!foodItemId) {
+      Alert.alert('Помилка', 'Не вдалося визначити ID позиції для замовлення.');
+      console.error('Food item has no ID:', item);
+      return;
+    }
+
     try {
-      setOrderingItemId(item.id);
+      setOrderingItemId(foodItemId);
 
       await api.orders.create({
         restaurant: restaurantId,
         pickupTime,
         items: [
           {
-            foodItem: item.id,
+            foodItem: foodItemId,
             quantity,
           },
         ],

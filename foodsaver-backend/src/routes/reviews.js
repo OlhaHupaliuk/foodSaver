@@ -22,6 +22,9 @@ router.get("/restaurant/:restaurantId", reviewController.getRestaurantReviews);
 // GET reviews for food item
 router.get("/food-item/:foodItemId", reviewController.getFoodItemReviews);
 
+// GET reviews for order
+router.get("/order/:orderId", protect, reviewController.getOrderReviews);
+
 // POST create review
 router.post("/", protect, reviewValidation, reviewController.createReview);
 

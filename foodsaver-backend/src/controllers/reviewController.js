@@ -41,8 +41,18 @@ exports.getRestaurantReviews = async (req, res, next) => {
 // @access  Public
 exports.getFoodItemReviews = async (req, res, next) => {
   try {
+    const foodItemId = req.params.foodItemId;
+
+    // Validate foodItemId
+    if (!foodItemId || foodItemId === "undefined" || foodItemId === "null") {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid food item ID",
+      });
+    }
+
     const reviews = await Review.find({
-      foodItem: req.params.foodItemId,
+      foodItem: foodItemId,
     })
       .populate("user", "name")
       .sort({ createdAt: -1 });
@@ -65,6 +75,30 @@ exports.getFoodItemReviews = async (req, res, next) => {
   }
 };
 
+// @desc    Get reviews for an order
+// @route   GET /api/reviews/order/:orderId
+// @access  Private
+exports.getOrderReviews = async (req, res, next) => {
+  try {
+    const reviews = await Review.find({
+      order: req.params.orderId,
+    })
+      .populate("user", "name")
+      .populate("foodItem", "title")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      status: "success",
+      results: reviews.length,
+      data: {
+        reviews,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Create review
 // @route   POST /api/reviews
 // @access  Private
@@ -79,9 +113,99 @@ exports.createReview = async (req, res, next) => {
       });
     }
 
-    const { restaurant, foodItem, rating, comment, order } = req.body;
+    let { restaurant, foodItem, rating, comment, order } = req.body;
 
-    // Validate that either restaurant or foodItem is provided
+    // Clean up undefined values (they come as string "undefined" from JSON)
+    if (
+      foodItem === "undefined" ||
+      foodItem === undefined ||
+      foodItem === null
+    ) {
+      foodItem = null;
+    }
+    if (
+      restaurant === "undefined" ||
+      restaurant === undefined ||
+      restaurant === null
+    ) {
+      restaurant = null;
+    }
+    if (order === "undefined" || order === undefined || order === null) {
+      order = null;
+    }
+
+    // If order is provided, extract foodItem from it first
+    if (order) {
+      // Verify the order belongs to the user
+      const orderDoc = await Order.findById(order).select("user status items");
+      if (!orderDoc) {
+        return res.status(404).json({
+          status: "error",
+          message: "Order not found",
+        });
+      }
+
+      // Get user IDs as strings for comparison
+      // Handle both populated and non-populated user field
+      let orderUserId;
+      if (
+        orderDoc.user &&
+        typeof orderDoc.user === "object" &&
+        orderDoc.user._id
+      ) {
+        // User is populated
+        orderUserId = orderDoc.user._id.toString();
+      } else {
+        // User is ObjectId
+        orderUserId = orderDoc.user.toString();
+      }
+
+      const currentUserId = req.user._id.toString();
+
+      if (orderUserId !== currentUserId) {
+        console.log(
+          "Authorization failed - Order user ID:",
+          orderUserId,
+          "Current user ID:",
+          currentUserId
+        );
+        return res.status(403).json({
+          status: "error",
+          message: "Not authorized to review this order",
+        });
+      }
+
+      // Verify order is completed
+      if (orderDoc.status !== "completed") {
+        return res.status(400).json({
+          status: "error",
+          message: "Can only review completed orders",
+        });
+      }
+
+      // If foodItem is not provided, get it from the order
+      if (!foodItem && orderDoc.items && orderDoc.items.length > 0) {
+        const firstOrderItem = orderDoc.items[0];
+        foodItem =
+          firstOrderItem.foodItem?.toString() || firstOrderItem.foodItem;
+        req.body.foodItem = foodItem;
+      }
+
+      // Check if user already reviewed this order
+      const existingOrderReview = await Review.findOne({
+        user: req.user._id,
+        order: order,
+      });
+
+      if (existingOrderReview) {
+        return res.status(400).json({
+          status: "error",
+          message: "You have already reviewed this order",
+        });
+      }
+    }
+
+    // Validate that either restaurant or foodItem is provided (after extracting from order if needed)
     if (!restaurant && !foodItem) {
       return res.status(400).json({
         status: "error",
@@ -112,19 +236,19 @@ exports.createReview = async (req, res, next) => {
       if (!restaurant) {
         req.body.restaurant = foodItemExists.restaurant;
       }
-    }
-
-    // Check if user already reviewed (optional: one review per user per restaurant/item)
-    const existingReview = await Review.findOne({
-      user: req.user._id,
-      ...(restaurant ? { restaurant } : { foodItem }),
-    });
-
-    if (existingReview) {
-      return res.status(400).json({
-        status: "error",
-        message: "You have already reviewed this restaurant/item",
+    } else {
+      // If no order, check if user already reviewed this restaurant/item (one review per user per restaurant/item)
+      const existingReview = await Review.findOne({
+        user: req.user._id,
+        ...(restaurant ? { restaurant } : { foodItem }),
       });
+
+      if (existingReview) {
+        return res.status(400).json({
+          status: "error",
+          message: "You have already reviewed this restaurant/item",
+        });
+      }
     }
 
     const review = await Review.create({
@@ -229,9 +353,3 @@ exports.deleteReview = async (req, res, next) => {
     next(error);
   }
 };
-
-
-
-
-
-

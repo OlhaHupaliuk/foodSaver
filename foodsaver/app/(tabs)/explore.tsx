@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity, Image, Modal, Alert } from 'react-native';
 import MapView, { Marker, Callout, Region } from 'react-native-maps';
 import { useEffect, useMemo, useState } from 'react';
 import { formatPrice } from '../../utils/format';
@@ -8,7 +8,7 @@ import { FoodItem } from '../../types/auth';
 import { getDefaultCoordinates, getUserLocation } from '../../services/location';
 import { useOrderActions } from '../../hooks/useOrderActions';
 import { useAuth } from '../../hooks/useAuth';
-import { MapPin, Clock, Percent, ShoppingBag, ChevronUp, ChevronDown } from 'lucide-react-native';
+import { MapPin, Clock, Percent, ShoppingBag, ChevronUp, ChevronDown, Star } from 'lucide-react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 
 const DEFAULT_REGION_DELTA = 0.05;
@@ -50,13 +50,26 @@ export default function ExploreScreen() {
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
   const [maxDistanceKm, setMaxDistanceKm] = useState<number | null>(null);
   const [isBottomSheetCollapsed, setIsBottomSheetCollapsed] = useState(false);
-  const { orderingItemId, confirmAndPlaceOrder } = useOrderActions();
+  const [orderModalVisible, setOrderModalVisible] = useState(false);
+  const [selectedOrderItem, setSelectedOrderItem] = useState<FoodItem | null>(null);
+  const { orderingItemId, placeOrder } = useOrderActions();
   
   // Restaurant owners cannot place orders
   const canPlaceOrder = user?.role !== 'restaurant_owner';
   
   const toggleBottomSheet = () => {
     setIsBottomSheetCollapsed(!isBottomSheetCollapsed);
+  };
+
+  const handleOrderConfirm = async () => {
+    if (!selectedOrderItem) return;
+    
+    setOrderModalVisible(false);
+    await placeOrder(selectedOrderItem, {
+      onSuccess: () => {
+        setSelectedOrderItem(null);
+      }
+    });
   };
 
   useEffect(() => {
@@ -85,7 +98,33 @@ export default function ExploreScreen() {
       setLoadingItems(true);
       const response = await api.foodItems.getAll();
       if (response.status === 'success') {
-        setFoodItems(response.data?.items ?? []);
+        const items = response.data?.items ?? [];
+        
+        // Load average ratings for each food item
+        const itemsWithRatings = await Promise.all(
+          items.map(async (item: FoodItem) => {
+            // Use item.id or item._id, and check if it exists
+            const itemId = item.id || (item as any)._id;
+            if (!itemId) {
+              // If no ID, return item as-is (might already have averageRating from backend)
+              return item;
+            }
+            
+            try {
+              const reviewResponse = await api.reviews.getByFoodItem(itemId);
+              if (reviewResponse.status === 'success' && reviewResponse.data) {
+                const avgRating = (reviewResponse.data as any).averageRating || 0;
+                return { ...item, averageRating: avgRating > 0 ? avgRating : undefined };
+              }
+            } catch (error) {
+              // If review fetch fails, just continue without rating
+              // Item might already have averageRating from backend response
+            }
+            return item;
+          })
+        );
+        
+        setFoodItems(itemsWithRatings);
       }
     } catch (error) {
       console.error('Error loading food items for map:', error);
@@ -151,18 +190,19 @@ export default function ExploreScreen() {
         showsUserLocation
         loadingEnabled
       >
-        {availableItems.map((item) => {
-          const coordinate = coordinatesFromItem(item);
-          if (!coordinate) return null;
+        {availableItems
+          .filter((item) => coordinatesFromItem(item) !== null)
+          .map((item, index) => {
+            const coordinate = coordinatesFromItem(item)!; // Non-null assertion since we filtered
 
-          return (
-            <Marker
-              key={item.id}
-              coordinate={coordinate}
-              pinColor="#10b981"
-              tracksViewChanges={false}
-            >
-              <Callout>
+            return (
+              <Marker
+                key={item.id || (item as any)._id || `marker-${index}`}
+                coordinate={coordinate}
+                pinColor="#10b981"
+                tracksViewChanges={false}
+              >
+              <Callout tooltip>
                 <View style={[styles.callout, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}>
                   {item.imageBase64 && (
                     <Image
@@ -173,7 +213,17 @@ export default function ExploreScreen() {
                     />
                   )}
                   <View style={styles.calloutContent}>
-                    <Text style={[styles.calloutTitle, { color: theme.colors.text }]}>{item.title}</Text>
+                    <View style={styles.calloutTitleRow}>
+                      <Text style={[styles.calloutTitle, { color: theme.colors.text }]}>{item.title}</Text>
+                      {item.averageRating && item.averageRating > 0 && (
+                        <View style={styles.calloutRating}>
+                          <Star size={12} color="#FBBF24" fill="#FBBF24" />
+                          <Text style={[styles.calloutRatingText, { color: theme.colors.text }]}>
+                            {item.averageRating.toFixed(1)}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
                     
                     {item.description && (
                       <Text style={[styles.calloutDescription, { color: theme.colors.textSecondary }]} numberOfLines={2}>
@@ -226,7 +276,14 @@ export default function ExploreScreen() {
                     {canPlaceOrder && item.isAvailable && (
                       <TouchableOpacity
                         style={[styles.calloutOrderButton, { backgroundColor: theme.colors.primaryAccent }]}
-                        onPress={() => confirmAndPlaceOrder(item)}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          // Small delay to prevent callout from closing before modal opens
+                          setTimeout(() => {
+                            setSelectedOrderItem(item);
+                            setOrderModalVisible(true);
+                          }, 100);
+                        }}
                         disabled={orderingItemId === item.id}
                       >
                         {orderingItemId === item.id ? (
@@ -398,16 +455,19 @@ export default function ExploreScreen() {
           <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>Немає доступних позицій поблизу за вибраними фільтрами</Text>
         ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {availableItems.slice(0, 10).map((item) => (
+            {availableItems.slice(0, 10).map((item, index) => (
               <TouchableOpacity
-                key={item.id}
+                key={item.id || (item as any)._id || `food-item-${index}`}
                 style={[
                   styles.itemCard,
                   { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border },
                   (!item.isAvailable || orderingItemId === item.id || !canPlaceOrder) &&
                     styles.disabledCard,
                 ]}
-                onPress={canPlaceOrder ? () => confirmAndPlaceOrder(item) : undefined}
+                onPress={canPlaceOrder ? () => {
+                  setSelectedOrderItem(item);
+                  setOrderModalVisible(true);
+                } : undefined}
                 disabled={!item.isAvailable || orderingItemId === item.id || !canPlaceOrder}
               >
                 <Text style={[styles.itemTitle, { color: theme.colors.text }]}>{item.title}</Text>
@@ -423,6 +483,54 @@ export default function ExploreScreen() {
           </>
         )}
       </View>
+
+      {/* Order Confirmation Modal */}
+      <Modal
+        visible={orderModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => {
+          setOrderModalVisible(false);
+          setSelectedOrderItem(null);
+        }}
+      >
+        <View style={[styles.modalOverlay, { backgroundColor: theme.colors.overlay || 'rgba(0, 0, 0, 0.8)' }]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            {selectedOrderItem && (
+              <>
+                <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Підтвердити замовлення</Text>
+                <Text style={[styles.modalSubtitle, { color: theme.colors.textSecondary }]}>
+                  Замовити "{selectedOrderItem.title}" з відбором протягом 30 хвилин?
+                </Text>
+                
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={[styles.modalCancelButton, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border }]}
+                    onPress={() => {
+                      setOrderModalVisible(false);
+                      setSelectedOrderItem(null);
+                    }}
+                  >
+                    <Text style={[styles.modalCancelButtonText, { color: theme.colors.textSecondary }]}>Скасувати</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    style={[styles.modalConfirmButton, { backgroundColor: theme.colors.primaryAccent }]}
+                    onPress={handleOrderConfirm}
+                    disabled={orderingItemId === selectedOrderItem.id}
+                  >
+                    {orderingItemId === selectedOrderItem.id ? (
+                      <ActivityIndicator size="small" color="#ffffff" />
+                    ) : (
+                      <Text style={styles.modalConfirmButtonText}>Замовити</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -460,7 +568,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#2A2A3E',
-    shadowColor: '#10b981',
+    shadowColor: '#1B7F5F',
     shadowOpacity: 0.3,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
@@ -529,7 +637,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   refreshText: {
-    color: '#10b981',
+    color: '#1B7F5F',
     fontWeight: '600',
     fontSize: 14,
   },
@@ -543,11 +651,12 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 12,
     borderWidth: 1,
+    margin: 12,
     borderColor: '#2A2A3E',
     shadowColor: '#000',
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.1,
     shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 0 },
     elevation: 4,
   },
   itemTitle: {
@@ -563,7 +672,7 @@ const styles = StyleSheet.create({
   itemPrice: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#10b981',
+    color: '#1B7F5F',
   },
   itemExpiry: {
     fontSize: 12,
@@ -585,6 +694,8 @@ const styles = StyleSheet.create({
     elevation: 12,
     borderWidth: 1,
     borderColor: '#2A2A3E',
+    margin: 0,
+    padding: 0,
   },
   calloutImage: {
     width: '100%',
@@ -594,11 +705,26 @@ const styles = StyleSheet.create({
   calloutContent: {
     padding: 10,
   },
+  calloutTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   calloutTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#E5E5F0',
-    marginBottom: 4,
+    flex: 1,
+  },
+  calloutRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginLeft: 8,
+  },
+  calloutRatingText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   calloutDescription: {
     fontSize: 11,
@@ -635,7 +761,7 @@ const styles = StyleSheet.create({
   calloutDiscountPrice: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#10b981',
+    color: '#1B7F5F',
   },
   calloutDiscountBadge: {
     backgroundColor: '#f97316',
@@ -672,7 +798,7 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
   },
   calloutOrderButton: {
-    backgroundColor: '#10b981',
+    backgroundColor: '#1B7F5F',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -753,5 +879,62 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#FFFFFF',
     fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#151520',
+    borderRadius: 20,
+    padding: 24,
+    width: '85%',
+    maxWidth: 400,
+    borderWidth: 1,
+    borderColor: '#2A2A3E',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#E5E5F0',
+    marginBottom: 8,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: '#9CA3AF',
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalCancelButton: {
+    flex: 1,
+    backgroundColor: '#1A1A2E',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#2A2A3E',
+  },
+  modalCancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#9CA3AF',
+  },
+  modalConfirmButton: {
+    flex: 1,
+    backgroundColor: '#10b981',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  modalConfirmButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });

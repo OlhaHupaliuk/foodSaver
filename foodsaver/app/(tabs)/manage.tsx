@@ -165,7 +165,7 @@
         const expiryTime = new Date();
         expiryTime.setHours(expiryTime.getHours() + parseInt(newItem.expiry_hours));
 
-        const itemData = {
+        const itemData: any = {
           title: newItem.title,
           description: newItem.description,
           category: newItem.category || 'Інше',
@@ -173,9 +173,12 @@
           discountedPrice: parseFloat(newItem.discount_price),
           quantity: parseInt(newItem.quantity),
           expiryTime: expiryTime.toISOString(),
-          // imageBase64 is sent so backend can store it in MongoDB (e.g. GridFS or encoded field)
-          imageBase64: newItem.imageBase64 || undefined,
         };
+        
+        // Only include imageBase64 if it's not empty
+        if (newItem.imageBase64 && newItem.imageBase64.trim().length > 0) {
+          itemData.imageBase64 = newItem.imageBase64;
+        }
 
         const response = await api.foodItems.create(itemData);
 
@@ -239,8 +242,15 @@
     
         if (!result.canceled && result.assets && result.assets.length > 0) {
           const asset = result.assets[0];
-          const base64 = asset.base64 || '';
-          setNewItem({ ...newItem, imageBase64: base64 });
+          const base64 = asset.base64;
+          
+          if (base64) {
+            console.log('Image base64 length:', base64.length);
+            setNewItem({ ...newItem, imageBase64: base64 });
+          } else {
+            Alert.alert('Помилка', 'Не вдалося завантажити зображення. Спробуйте ще раз.');
+            console.error('Base64 not available in image picker result');
+          }
         }
       } catch (error) {
         console.error('Error picking image:', error);
@@ -836,7 +846,7 @@
     discountPreviewText: {
       fontSize: 14,
       fontWeight: '600',
-      color: '#10b981',
+      color: '#1B7F5F',
     },
     modalButton: {
       backgroundColor: '#1B7F5F',

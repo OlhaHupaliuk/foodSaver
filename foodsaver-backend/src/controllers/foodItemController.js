@@ -1,6 +1,7 @@
 // controllers/foodItemController.js
 const FoodItem = require("../models/FoodItem");
 const Restaurant = require("../models/Restaurant");
+const Review = require("../models/Review");
 const { validationResult } = require("express-validator");
 
 // @desc    Get all food items
@@ -62,10 +63,38 @@ exports.getFoodItems = async (req, res, next) => {
 
     foodItems = foodItems.filter((item) => item.isAvailable);
 
+    // Calculate average ratings for each food item
+    const foodItemsWithRatings = await Promise.all(
+      foodItems.map(async (item) => {
+        const reviews = await Review.find({ foodItem: item._id });
+        const avgRating =
+          reviews.length > 0
+            ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+            : null;
+
+        const itemObj = item.toObject();
+        itemObj.averageRating = avgRating
+          ? parseFloat(avgRating.toFixed(2))
+          : null;
+        // Ensure imageBase64 is included if it exists
+        if (item.imageBase64) {
+          itemObj.imageBase64 = item.imageBase64;
+        }
+        // Ensure restaurant ID is always available (even when populated)
+        if (itemObj.restaurant && typeof itemObj.restaurant === "object") {
+          // If restaurant is populated, ensure we have the ID
+          if (!itemObj.restaurant.id && itemObj.restaurant._id) {
+            itemObj.restaurant.id = itemObj.restaurant._id.toString();
+          }
+        }
+        return itemObj;
+      })
+    );
+
     res.json({
       status: "success",
-      results: foodItems.length,
-      data: { items: foodItems },
+      results: foodItemsWithRatings.length,
+      data: { items: foodItemsWithRatings },
     });
   } catch (error) {
     next(error);
@@ -94,9 +123,30 @@ exports.getFoodItem = async (req, res, next) => {
       await foodItem.save();
     }
 
+    // Calculate average rating
+    const reviews = await Review.find({ foodItem: foodItem._id });
+    const avgRating =
+      reviews.length > 0
+        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        : null;
+
+    const itemObj = foodItem.toObject();
+    itemObj.averageRating = avgRating ? parseFloat(avgRating.toFixed(2)) : null;
+    // Ensure imageBase64 is included if it exists
+    if (foodItem.imageBase64) {
+      itemObj.imageBase64 = foodItem.imageBase64;
+    }
+    // Ensure restaurant ID is always available (even when populated)
+    if (itemObj.restaurant && typeof itemObj.restaurant === "object") {
+      // If restaurant is populated, ensure we have the ID
+      if (!itemObj.restaurant.id && itemObj.restaurant._id) {
+        itemObj.restaurant.id = itemObj.restaurant._id.toString();
+      }
+    }
+
     res.json({
       status: "success",
-      data: { item: foodItem },
+      data: { item: itemObj },
     });
   } catch (error) {
     next(error);
@@ -116,10 +166,38 @@ exports.getFoodItemsByRestaurant = async (req, res, next) => {
       .populate("restaurant", "name address phone googleMapsLink location")
       .sort({ createdAt: -1 });
 
+    // Calculate average ratings for each food item
+    const foodItemsWithRatings = await Promise.all(
+      foodItems.map(async (item) => {
+        const reviews = await Review.find({ foodItem: item._id });
+        const avgRating =
+          reviews.length > 0
+            ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+            : null;
+
+        const itemObj = item.toObject();
+        itemObj.averageRating = avgRating
+          ? parseFloat(avgRating.toFixed(2))
+          : null;
+        // Ensure imageBase64 is included if it exists
+        if (item.imageBase64) {
+          itemObj.imageBase64 = item.imageBase64;
+        }
+        // Ensure restaurant ID is always available (even when populated)
+        if (itemObj.restaurant && typeof itemObj.restaurant === "object") {
+          // If restaurant is populated, ensure we have the ID
+          if (!itemObj.restaurant.id && itemObj.restaurant._id) {
+            itemObj.restaurant.id = itemObj.restaurant._id.toString();
+          }
+        }
+        return itemObj;
+      })
+    );
+
     res.json({
       status: "success",
-      results: foodItems.length,
-      data: { items: foodItems },
+      results: foodItemsWithRatings.length,
+      data: { items: foodItemsWithRatings },
     });
   } catch (error) {
     next(error);
@@ -156,7 +234,7 @@ exports.createFoodItem = async (req, res, next) => {
       });
     }
 
-    const foodItem = await FoodItem.create({
+    const foodItemData = {
       title: req.body.title,
       description: req.body.description,
       category: req.body.category || "Other",
@@ -166,7 +244,25 @@ exports.createFoodItem = async (req, res, next) => {
       expiryTime: req.body.expiryTime,
       restaurant: req.user.restaurant,
       isAvailable: true,
-    });
+    };
+
+    // Only include imageBase64 if it exists and is not empty
+    if (
+      req.body.imageBase64 &&
+      typeof req.body.imageBase64 === "string" &&
+      req.body.imageBase64.trim().length > 0
+    ) {
+      foodItemData.imageBase64 = req.body.imageBase64.trim();
+      console.log(
+        "Saving imageBase64, length:",
+        foodItemData.imageBase64.length
+      );
+    } else {
+      console.log("No imageBase64 provided or empty");
+    }
+
+    const foodItem = await FoodItem.create(foodItemData);
+    console.log("Food item created with imageBase64:", !!foodItem.imageBase64);
 
     await foodItem.populate("restaurant", "name address phone");
 

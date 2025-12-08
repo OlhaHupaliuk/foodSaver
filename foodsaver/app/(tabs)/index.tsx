@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { useState, useEffect } from 'react';
-import { MapPin, Clock, Percent } from 'lucide-react-native';
+import { MapPin, Clock, Percent, Star, RefreshCw } from 'lucide-react-native';
 import { formatPrice } from '../../utils/format';
 import { getTimeUntilExpiry } from '../../utils/discount';
 import { router } from 'expo-router';
@@ -12,6 +12,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 
 export default function HomeScreen() {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
+  const [loading, setLoading] = useState(false);
   const { theme } = useTheme();
 
   const { user } = useAuth();
@@ -23,12 +24,15 @@ export default function HomeScreen() {
 
   const loadFoodItems = async () => {
     try {
+      setLoading(true);
       const response = await api.foodItems.getAll(); // або getNearby(user.location)
       if (response.status === 'success') {
         setFoodItems(response.data?.items ?? []);
       }
     } catch (error) {
       console.error('Error loading food items:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,6 +65,17 @@ export default function HomeScreen() {
           <View style={styles.foodList}>
             <View style={styles.listHeaderRow}>
               <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Найближчі</Text>
+              <TouchableOpacity
+                onPress={loadFoodItems}
+                disabled={loading}
+                style={styles.refreshButton}
+              >
+                {loading ? (
+                  <ActivityIndicator size="small" color={theme.colors.primaryAccent} />
+                ) : (
+                  <RefreshCw size={18} color={theme.colors.primaryAccent} />
+                )}
+              </TouchableOpacity>
             </View>
 
             {foodItems.length === 0 ? (
@@ -71,9 +86,9 @@ export default function HomeScreen() {
                 </Text>
               </View>
             ) : (
-              foodItems.map((item) => (
+              foodItems.map((item, index) => (
                 <TouchableOpacity
-                  key={item.id}
+                  key={item.id || (item as any)._id || `food-item-${index}`}
                   style={[
                     styles.foodCard,
                     { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border },
@@ -92,7 +107,17 @@ export default function HomeScreen() {
                     style={[styles.foodImage, { backgroundColor: theme.colors.surfaceTertiary }]}
                   />
                   <View style={styles.foodInfo}>
-                    <Text style={[styles.foodTitle, { color: theme.colors.text }]}>{item.title}</Text>
+                    <View style={styles.foodTitleRow}>
+                      <Text style={[styles.foodTitle, { color: theme.colors.text }]}>{item.title}</Text>
+                      {item.averageRating && item.averageRating > 0 && (
+                        <View style={styles.foodRating}>
+                          <Star size={14} color="#FBBF24" fill="#FBBF24" />
+                          <Text style={[styles.foodRatingText, { color: theme.colors.text }]}>
+                            {item.averageRating.toFixed(1)}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
                     <View style={styles.restaurantInfo}>
                       <MapPin size={14} color={theme.colors.textSecondary} />
                       <Text style={[styles.restaurantName, { color: theme.colors.textSecondary }]}>
@@ -188,6 +213,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
+  refreshButton: {
+    padding: 8,
+    borderRadius: 8,
+  },
   foodCard: {
     backgroundColor: '#1A1A2E',
     borderRadius: 16,
@@ -209,11 +238,26 @@ const styles = StyleSheet.create({
   foodInfo: {
     padding: 16,
   },
+  foodTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   foodTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#E5E5F0',
-    marginBottom: 8,
+    flex: 1,
+  },
+  foodRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginLeft: 8,
+  },
+  foodRatingText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   restaurantInfo: {
     flexDirection: 'row',

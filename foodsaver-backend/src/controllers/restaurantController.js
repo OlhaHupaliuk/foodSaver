@@ -102,7 +102,9 @@ exports.createRestaurant = async (req, res, next) => {
 
     // Спробуємо витягнути координати з Google Maps посилання
     if (req.body.googleMapsLink) {
-      coordinates = extractCoordinatesFromMapsLink(req.body.googleMapsLink);
+      coordinates = await extractCoordinatesFromMapsLink(
+        req.body.googleMapsLink
+      );
     }
 
     // Якщо не вдалося витягнути з посилання, геокодуємо адресу
@@ -182,7 +184,9 @@ exports.updateRestaurant = async (req, res, next) => {
       let coordinates;
 
       if (req.body.googleMapsLink) {
-        coordinates = extractCoordinatesFromMapsLink(req.body.googleMapsLink);
+        coordinates = await extractCoordinatesFromMapsLink(
+          req.body.googleMapsLink
+        );
       }
 
       if (!coordinates && req.body.address) {

@@ -14,21 +14,21 @@ export const themeLight = {
     
     // Primary colors
     primary: '#1B7F5F',
-    primaryDark: '#059669',
-    primaryLight: '#34D399',
-    primaryAccent: '#10b981',
+    primaryDark: '#1B7F5F',
+    primaryLight: '#1B7F5F',
+    primaryAccent: '#1B7F5F',
     
     // Secondary colors
     secondary: '#F59E0B',
     secondaryDark: '#D97706',
-    secondaryLight: '#FBBF24',
+    secondaryLight: '#eab736ff',
     
     // Status colors
     error: '#DC2626',
     errorLight: '#EF4444',
     errorBackground: '#FEE2E2',
-    warning: '#F59E0B',
-    success: '#10b981',
+    warning: '#de9f31ff',
+    success: '#1B7F5F',
     
     // Border colors
     border: '#E5E7EB',

@@ -180,13 +180,8 @@ exports.createOrder = async (req, res, next) => {
 exports.updateOrderStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
-    const validStatuses = [
-      "pending",
-      "confirmed",
-      "ready",
-      "completed",
-      "cancelled",
-    ];
+    // Only allow: pending, completed, cancelled
+    const validStatuses = ["pending", "completed", "cancelled"];
 
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
