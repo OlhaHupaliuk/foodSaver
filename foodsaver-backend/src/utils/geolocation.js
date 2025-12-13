@@ -24,7 +24,7 @@ const toRad = (value) => {
   return (value * Math.PI) / 180;
 };
 
-// функція для пошуку об'єктів в радіусі (MongoDB geospatial query)
+// функція для пошуку об'єктів в радіусі 
 exports.findNearby = async (Model, longitude, latitude, maxDistance = 5000) => {
   return await Model.find({
     location: {

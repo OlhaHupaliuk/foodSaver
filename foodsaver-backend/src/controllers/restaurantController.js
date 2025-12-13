@@ -112,9 +112,14 @@ exports.createRestaurant = async (req, res, next) => {
       coordinates = await geocodeAddress(req.body.address);
     }
 
-    // Якщо все ще немає координат, використовуємо за замовчуванням (Київ)
+    // Якщо не вдалося отримати координати з посилання чи адреси,
+    // не підставляємо "дефолтну" локацію — повертаємо помилку валідації.
     if (!coordinates) {
-      coordinates = [30.5234, 50.4501];
+      return res.status(400).json({
+        status: "error",
+        message:
+          "Не вдалося визначити координати з Google Maps посилання або адреси. Будь ласка, вкажіть коректне посилання або адресу.",
+      });
     }
 
     const restaurantData = {

@@ -11,12 +11,12 @@ const reviewSchema = new mongoose.Schema(
     restaurant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Restaurant",
-      required: false, // Required if foodItem is not provided
+      required: false,
     },
     foodItem: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "FoodItem",
-      required: false, // Required if restaurant is not provided
+      required: false,
     },
     rating: {
       type: Number,
@@ -31,7 +31,7 @@ const reviewSchema = new mongoose.Schema(
     order: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Order",
-      required: false, // Optional: link review to specific order
+      required: false,
     },
   },
   { timestamps: true }

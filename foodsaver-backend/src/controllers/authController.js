@@ -34,7 +34,6 @@ exports.register = async (req, res, next) => {
       });
     }
 
-    // Створення користувача БЕЗ координат
     user = await User.create({
       name,
       email,

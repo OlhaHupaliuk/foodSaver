@@ -29,11 +29,11 @@ const orderSchema = new mongoose.Schema({
       },
       originalPrice: {
         type: Number,
-        required: false, // Store original price for statistics
+        required: false,
       },
       discountedPrice: {
         type: Number,
-        required: false, // Store discounted price for statistics
+        required: false,
       },
     },
   ],
@@ -44,7 +44,7 @@ const orderSchema = new mongoose.Schema({
   },
   totalDiscount: {
     type: Number,
-    default: 0, // Total discount amount for statistics
+    default: 0,
   },
   status: {
     type: String,

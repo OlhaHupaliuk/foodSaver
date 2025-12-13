@@ -32,7 +32,6 @@ exports.getFoodItems = async (req, res, next) => {
       })
       .sort({ createdAt: -1 });
 
-    // Геолокаційний фільтр
     if (longitude && latitude) {
       const distance = maxDistance || 5000;
       const nearbyRestaurants = await Restaurant.find({
@@ -53,7 +52,6 @@ exports.getFoodItems = async (req, res, next) => {
       );
     }
 
-    // Перевірка термінів придатності
     for (let item of foodItems) {
       item.checkAvailability();
       if (!item.isAvailable) {
@@ -63,7 +61,6 @@ exports.getFoodItems = async (req, res, next) => {
 
     foodItems = foodItems.filter((item) => item.isAvailable);
 
-    // Calculate average ratings for each food item
     const foodItemsWithRatings = await Promise.all(
       foodItems.map(async (item) => {
         const reviews = await Review.find({ foodItem: item._id });
@@ -76,13 +73,10 @@ exports.getFoodItems = async (req, res, next) => {
         itemObj.averageRating = avgRating
           ? parseFloat(avgRating.toFixed(2))
           : null;
-        // Ensure imageBase64 is included if it exists
         if (item.imageBase64) {
           itemObj.imageBase64 = item.imageBase64;
         }
-        // Ensure restaurant ID is always available (even when populated)
         if (itemObj.restaurant && typeof itemObj.restaurant === "object") {
-          // If restaurant is populated, ensure we have the ID
           if (!itemObj.restaurant.id && itemObj.restaurant._id) {
             itemObj.restaurant.id = itemObj.restaurant._id.toString();
           }
@@ -123,7 +117,6 @@ exports.getFoodItem = async (req, res, next) => {
       await foodItem.save();
     }
 
-    // Calculate average rating
     const reviews = await Review.find({ foodItem: foodItem._id });
     const avgRating =
       reviews.length > 0
@@ -132,13 +125,11 @@ exports.getFoodItem = async (req, res, next) => {
 
     const itemObj = foodItem.toObject();
     itemObj.averageRating = avgRating ? parseFloat(avgRating.toFixed(2)) : null;
-    // Ensure imageBase64 is included if it exists
     if (foodItem.imageBase64) {
       itemObj.imageBase64 = foodItem.imageBase64;
     }
-    // Ensure restaurant ID is always available (even when populated)
+    
     if (itemObj.restaurant && typeof itemObj.restaurant === "object") {
-      // If restaurant is populated, ensure we have the ID
       if (!itemObj.restaurant.id && itemObj.restaurant._id) {
         itemObj.restaurant.id = itemObj.restaurant._id.toString();
       }
@@ -246,7 +237,6 @@ exports.createFoodItem = async (req, res, next) => {
       isAvailable: true,
     };
 
-    // Only include imageBase64 if it exists and is not empty
     if (
       req.body.imageBase64 &&
       typeof req.body.imageBase64 === "string" &&
