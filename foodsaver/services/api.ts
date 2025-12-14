@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AuthResponse, AuthLoginResponse, GetMeResponse, AuthUser, AuthError, AuthErrorType, FoodItem, RestaurantStatisticsResponse } from '../types/auth';
+import { AuthResponse, AuthLoginResponse, GetMeResponse, AuthUser, FoodItem, RestaurantStatisticsResponse } from '../types/auth';
 
 const API_URL = 'http://192.168.0.101:5000/api';
 

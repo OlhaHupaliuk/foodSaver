@@ -374,29 +374,29 @@ export default function ProfileScreen() {
         transparent
         onRequestClose={() => setShowCreateRestaurant(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Створити ресторан</Text>
+        <View style={[styles.modalOverlay, { backgroundColor: theme.colors.overlay }]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.border }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: theme.colors.border }]}>
+              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Створити ресторан</Text>
               <TouchableOpacity onPress={() => setShowCreateRestaurant(false)}>
-                <X size={24} color="#6b7280" />
+                <X size={24} color={theme.colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.modalForm} keyboardShouldPersistTaps="handled">
               <TextInput
-                style={styles.modalInput}
+                style={[styles.modalInput, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                 placeholder="Назва ресторану *"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={theme.colors.textSecondary}
                 value={restaurantData.name}
                 onChangeText={(text) => setRestaurantData({...restaurantData, name: text})}
                 editable={!saving}
               />
 
               <TextInput
-                style={styles.modalInput}
+                style={[styles.modalInput, { backgroundColor: theme.colors.surfaceSecondary, borderColor: theme.colors.border, color: theme.colors.text }]}
                 placeholder="Телефон *"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={theme.colors.textSecondary}
                 value={restaurantData.phone}
                 onChangeText={(text) => setRestaurantData({...restaurantData, phone: text})}
                 keyboardType="phone-pad"

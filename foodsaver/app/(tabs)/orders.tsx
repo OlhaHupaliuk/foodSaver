@@ -6,7 +6,7 @@ import { api } from '../../services/api';
 import { Order } from '../../types/auth';
 import { ChevronDown, Star } from 'lucide-react-native';
 import { useTheme } from '../../contexts/ThemeContext';
-import StarRating from '../../components/common/StarRating';
+import StarRating from '../../components/StarRating';
 
 export default function OrdersScreen() {
   const { user } = useAuth();
